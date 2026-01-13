@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
+  <channel>
+    <title>Noetect Updates</title>
+    <link>https://github.com/firstloophq/noetect</link>
+    <description>Updates for Noetect</description>
+    <language>en</language>
+
+    <!-- Releases are automatically added here by the release workflow -->
+
+  </channel>
+</rss>

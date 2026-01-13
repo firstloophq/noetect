@@ -222,15 +222,66 @@ jobs:
           cat appcast-entry.xml
           echo "===================="
 
+      - name: Update appcast.xml
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          ZIP_NAME="Noetect-${VERSION}.zip"
+          FILE_SIZE=$(stat -f%z "mac-app/$ZIP_NAME")
+          PUB_DATE=$(date -R)
+
+          # Create the new item entry
+          NEW_ITEM=$(cat << EOF
+    <item>
+      <title>Version $VERSION</title>
+      <pubDate>$PUB_DATE</pubDate>
+      <sparkle:version>$VERSION</sparkle:version>
+      <sparkle:shortVersionString>$VERSION</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>12.0</sparkle:minimumSystemVersion>
+      <description><![CDATA[
+        <h2>What's New in $VERSION</h2>
+        <p>See release notes on GitHub.</p>
+      ]]></description>
+      <enclosure
+        url="https://github.com/${{ github.repository }}/releases/download/v${VERSION}/${ZIP_NAME}"
+        length="$FILE_SIZE"
+        type="application/octet-stream"
+        sparkle:edSignature="$SPARKLE_SIGNATURE"
+      />
+    </item>
+          EOF
+          )
+
+          # Insert new item after <language>en</language> line
+          awk -v new_item="$NEW_ITEM" '
+            /<language>en<\/language>/ {
+              print
+              print ""
+              print new_item
+              next
+            }
+            { print }
+          ' docs/appcast.xml > docs/appcast.xml.tmp
+          mv docs/appcast.xml.tmp docs/appcast.xml
+
+          echo "Updated appcast.xml:"
+          cat docs/appcast.xml
+
+      - name: Commit appcast.xml
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/appcast.xml
+          git commit -m "Update appcast.xml for v${{ steps.version.outputs.version }}"
+          git push
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ steps.version.outputs.version }}
           name: Noetect v${{ steps.version.outputs.version }}
-          draft: true
+          draft: false
           files: |
             mac-app/Noetect-${{ steps.version.outputs.version }}.zip
-            mac-app/appcast-entry.xml
           body: |
             ## Noetect v${{ steps.version.outputs.version }}
 
@@ -240,9 +291,5 @@ jobs:
 
             ### Auto-Update
             Existing users will receive this update automatically.
-
-            ---
-
-            **Appcast entry** for `noetect.com/appcast.xml` is attached as `appcast-entry.xml`.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
