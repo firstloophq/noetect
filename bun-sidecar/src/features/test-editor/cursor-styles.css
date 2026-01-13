@@ -1,0 +1,16 @@
+/* Autocomplete ghost text */
+.autocomplete-ghost {
+    color: #9ca3af;
+    opacity: 0.6;
+    pointer-events: none;
+    user-select: none;
+    font-style: italic;
+}
+
+/* Hint for Tab to accept */
+.autocomplete-ghost::after {
+    content: "  ⇥";
+    font-size: 0.75em;
+    opacity: 0.5;
+    font-style: normal;
+}

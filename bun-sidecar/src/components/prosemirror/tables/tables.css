@@ -1,0 +1,167 @@
+/* ProseMirror Table Styles
+ * Uses inherit/transparent to respect parent theme colors
+ * Uses table-layout: fixed to prevent layout jumping on cursor movement
+ */
+
+/* Table container - use fixed layout to prevent re-layout on cursor movement */
+.ProseMirror table {
+    border-collapse: collapse;
+    margin: 1em 0;
+    table-layout: fixed;
+    width: 100%;
+    background: transparent;
+}
+
+/* Table cells */
+.ProseMirror td,
+.ProseMirror th {
+    border: 1px solid currentColor;
+    border-color: inherit;
+    padding: 0.5em 0.75em;
+    vertical-align: top;
+    box-sizing: border-box;
+    position: relative;
+    background: transparent;
+    /* Ensure cells don't collapse */
+    min-width: 3em;
+}
+
+/* Use prose border color if available */
+.prose .ProseMirror td,
+.prose .ProseMirror th {
+    border-color: var(--tw-prose-td-borders, currentColor);
+}
+
+/* Header cells - slightly muted background */
+.ProseMirror th {
+    font-weight: 600;
+    text-align: left;
+    background: rgba(128, 128, 128, 0.08);
+}
+
+/* Cell alignment */
+.ProseMirror td[style*="text-align: center"],
+.ProseMirror th[style*="text-align: center"] {
+    text-align: center;
+}
+
+.ProseMirror td[style*="text-align: right"],
+.ProseMirror th[style*="text-align: right"] {
+    text-align: right;
+}
+
+.ProseMirror td[style*="text-align: left"],
+.ProseMirror th[style*="text-align: left"] {
+    text-align: left;
+}
+
+/* Selected cell highlight */
+.ProseMirror .selectedCell {
+    background-color: rgba(59, 130, 246, 0.15) !important;
+}
+
+.ProseMirror .selectedCell::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background: rgba(59, 130, 246, 0.1);
+    pointer-events: none;
+    z-index: 2;
+}
+
+/* Column resize handle (if enabled) */
+.ProseMirror .column-resize-handle {
+    position: absolute;
+    right: -2px;
+    top: 0;
+    bottom: -1px;
+    width: 4px;
+    background-color: rgba(59, 130, 246, 0.6);
+    pointer-events: none;
+    z-index: 20;
+}
+
+/* Resize cursor on table */
+.ProseMirror.resize-cursor {
+    cursor: col-resize;
+}
+
+/* Table wrapper for horizontal scroll on narrow viewports */
+.ProseMirror .tableWrapper {
+    overflow-x: auto;
+    margin: 1em 0;
+}
+
+.ProseMirror .tableWrapper table {
+    margin: 0;
+}
+
+/* Empty cell placeholder - ensure cells maintain height */
+.ProseMirror td:empty::before,
+.ProseMirror th:empty::before {
+    content: "\00a0";
+    color: transparent;
+}
+
+/* Subtle hover effect - but not when selected */
+.ProseMirror td:not(.selectedCell):hover,
+.ProseMirror th:not(.selectedCell):hover {
+    background: rgba(128, 128, 128, 0.05);
+}
+
+.ProseMirror th:not(.selectedCell):hover {
+    background: rgba(128, 128, 128, 0.12);
+}
+
+/* Print styles */
+@media print {
+    .ProseMirror table {
+        page-break-inside: avoid;
+    }
+
+    .ProseMirror td,
+    .ProseMirror th {
+        border-color: #000;
+    }
+}
+
+/* Gap cursor styling - prevents weird visual effects at cell borders */
+.ProseMirror-gapcursor {
+    display: none;
+    pointer-events: none;
+    position: absolute;
+}
+
+.ProseMirror-gapcursor::after {
+    content: "";
+    display: block;
+    position: absolute;
+    top: -2px;
+    width: 20px;
+    border-top: 1px solid currentColor;
+    animation: ProseMirror-cursor-blink 1.1s steps(2, start) infinite;
+}
+
+@keyframes ProseMirror-cursor-blink {
+    to {
+        visibility: hidden;
+    }
+}
+
+.ProseMirror-focused .ProseMirror-gapcursor {
+    display: block;
+}
+
+/* Ensure cells have proper cursor behavior */
+.ProseMirror td,
+.ProseMirror th {
+    cursor: text;
+}
+
+/* Prevent border flicker during cursor movement */
+.ProseMirror table {
+    border-spacing: 0;
+}

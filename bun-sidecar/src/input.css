@@ -1,0 +1,1403 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap');
+@import url('tldraw/tldraw.css');
+@import "tailwindcss";
+/* TLDraw Agent Styles */
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --background: hsl(0 0% 100%);
+  --foreground: hsl(240 10% 3.9%);
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(240 10% 3.9%);
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(240 10% 3.9%);
+  --primary: hsl(240 5.9% 10%);
+  --primary-foreground: hsl(0 0% 98%);
+  --secondary: hsl(240 4.8% 95.9%);
+  --secondary-foreground: hsl(240 5.9% 10%);
+  --muted: hsl(240 4.8% 95.9%);
+  --muted-foreground: hsl(240 3.8% 46.1%);
+  --accent: hsl(240 4.8% 95.9%);
+  --accent-foreground: hsl(240 5.9% 10%);
+  --destructive: hsl(0 84.2% 60.2%);
+  --destructive-foreground: hsl(0 0% 98%);
+  --border: hsl(240 5.9% 90%);
+  --input: hsl(240 5.9% 90%);
+  --ring: hsl(240 10% 3.9%);
+  --chart-1: hsl(12 76% 61%);
+  --chart-2: hsl(173 58% 39%);
+  --chart-3: hsl(197 37% 24%);
+  --chart-4: hsl(43 74% 66%);
+  --chart-5: hsl(27 87% 67%);
+  --radius: 0.6rem;
+  --sidebar-background: hsl(0 0% 98%);
+  --sidebar-foreground: hsl(240 5.3% 26.1%);
+  --sidebar-primary: hsl(240 5.9% 10%);
+  --sidebar-primary-foreground: hsl(0 0% 98%);
+  --sidebar-accent: hsl(240 4.8% 95.9%);
+  --sidebar-accent-foreground: hsl(240 5.9% 10%);
+  --sidebar-border: hsl(220 13% 91%);
+  --sidebar-ring: hsl(217.2 91.2% 59.8%);
+  --sidebar: hsl(0 0% 98%);
+}
+
+.dark {
+  --background: hsl(240 10% 3.9%);
+  --foreground: hsl(0 0% 98%);
+  --card: hsl(240 10% 6%);
+  --card-foreground: hsl(0 0% 98%);
+  --popover: hsl(240 10% 6%);
+  --popover-foreground: hsl(0 0% 98%);
+  --primary: hsl(0 0% 98%);
+  --primary-foreground: hsl(240 5.9% 10%);
+  --secondary: hsl(240 3.7% 15.9%);
+  --secondary-foreground: hsl(0 0% 98%);
+  --muted: hsl(240 3.7% 15.9%);
+  --muted-foreground: hsl(240 5% 64.9%);
+  --accent: hsl(240 3.7% 15.9%);
+  --accent-foreground: hsl(0 0% 98%);
+  --destructive: hsl(0 62.8% 30.6%);
+  --destructive-foreground: hsl(0 0% 98%);
+  --border: hsl(240 3.7% 15.9%);
+  --input: hsl(240 3.7% 15.9%);
+  --ring: hsl(240 4.9% 83.9%);
+  --chart-1: hsl(220 70% 50%);
+  --chart-2: hsl(160 60% 45%);
+  --chart-3: hsl(30 80% 55%);
+  --chart-4: hsl(280 65% 60%);
+  --chart-5: hsl(340 75% 55%);
+  --sidebar-background: hsl(240 5.9% 10%);
+  --sidebar-foreground: hsl(240 4.8% 95.9%);
+  --sidebar-primary: hsl(224.3 76.3% 48%);
+  --sidebar-primary-foreground: hsl(0 0% 100%);
+  --sidebar-accent: hsl(240 3.7% 15.9%);
+  --sidebar-accent-foreground: hsl(240 4.8% 95.9%);
+  --sidebar-border: hsl(240 3.7% 15.9%);
+  --sidebar-ring: hsl(217.2 91.2% 59.8%);
+  --sidebar: hsl(240 5.9% 10%);
+}
+
+.blue {
+  --background: hsl(210 40% 98%);
+  --foreground: hsl(222.2 84% 4.9%);
+  --card: hsl(210 40% 98%);
+  --card-foreground: hsl(222.2 84% 4.9%);
+  --popover: hsl(210 40% 98%);
+  --popover-foreground: hsl(222.2 84% 4.9%);
+  --primary: hsl(221.2 83.2% 53.3%);
+  --primary-foreground: hsl(210 40% 98%);
+  --secondary: hsl(210 40% 96%);
+  --secondary-foreground: hsl(222.2 84% 4.9%);
+  --muted: hsl(210 40% 96%);
+  --muted-foreground: hsl(215.4 16.3% 46.9%);
+  --accent: hsl(210 40% 96%);
+  --accent-foreground: hsl(222.2 84% 4.9%);
+  --destructive: hsl(0 84.2% 60.2%);
+  --destructive-foreground: hsl(210 40% 98%);
+  --border: hsl(214.3 31.8% 91.4%);
+  --input: hsl(214.3 31.8% 91.4%);
+  --ring: hsl(221.2 83.2% 53.3%);
+  --sidebar-background: hsl(210 40% 98%);
+  --sidebar-foreground: hsl(222.2 84% 4.9%);
+  --sidebar-primary: hsl(221.2 83.2% 53.3%);
+  --sidebar-primary-foreground: hsl(210 40% 98%);
+  --sidebar-accent: hsl(210 40% 96%);
+  --sidebar-accent-foreground: hsl(222.2 84% 4.9%);
+  --sidebar-border: hsl(214.3 31.8% 91.4%);
+  --sidebar-ring: hsl(221.2 83.2% 53.3%);
+  --sidebar: hsl(210 40% 98%);
+}
+
+.green {
+  --background: hsl(120 20% 98%);
+  --foreground: hsl(120 10% 3.9%);
+  --card: hsl(120 20% 98%);
+  --card-foreground: hsl(120 10% 3.9%);
+  --popover: hsl(120 20% 98%);
+  --popover-foreground: hsl(120 10% 3.9%);
+  --primary: hsl(142.1 76.2% 36.3%);
+  --primary-foreground: hsl(120 20% 98%);
+  --secondary: hsl(120 20% 95%);
+  --secondary-foreground: hsl(120 10% 3.9%);
+  --muted: hsl(120 20% 95%);
+  --muted-foreground: hsl(120 3.8% 46.1%);
+  --accent: hsl(120 20% 95%);
+  --accent-foreground: hsl(120 10% 3.9%);
+  --destructive: hsl(0 84.2% 60.2%);
+  --destructive-foreground: hsl(120 20% 98%);
+  --border: hsl(120 20% 89%);
+  --input: hsl(120 20% 89%);
+  --ring: hsl(142.1 76.2% 36.3%);
+  --sidebar-background: hsl(120 20% 98%);
+  --sidebar-foreground: hsl(120 10% 3.9%);
+  --sidebar-primary: hsl(142.1 76.2% 36.3%);
+  --sidebar-primary-foreground: hsl(120 20% 98%);
+  --sidebar-accent: hsl(120 20% 95%);
+  --sidebar-accent-foreground: hsl(120 10% 3.9%);
+  --sidebar-border: hsl(120 20% 89%);
+  --sidebar-ring: hsl(142.1 76.2% 36.3%);
+  --sidebar: hsl(120 20% 98%);
+}
+
+.purple {
+  --background: hsl(280 20% 98%);
+  --foreground: hsl(280 10% 3.9%);
+  --card: hsl(280 20% 98%);
+  --card-foreground: hsl(280 10% 3.9%);
+  --popover: hsl(280 20% 98%);
+  --popover-foreground: hsl(280 10% 3.9%);
+  --primary: hsl(262.1 83.3% 57.8%);
+  --primary-foreground: hsl(280 20% 98%);
+  --secondary: hsl(280 20% 95%);
+  --secondary-foreground: hsl(280 10% 3.9%);
+  --muted: hsl(280 20% 95%);
+  --muted-foreground: hsl(280 3.8% 46.1%);
+  --accent: hsl(280 20% 95%);
+  --accent-foreground: hsl(280 10% 3.9%);
+  --destructive: hsl(0 84.2% 60.2%);
+  --destructive-foreground: hsl(280 20% 98%);
+  --border: hsl(280 20% 89%);
+  --input: hsl(280 20% 89%);
+  --ring: hsl(262.1 83.3% 57.8%);
+  --sidebar-background: hsl(280 20% 98%);
+  --sidebar-foreground: hsl(280 10% 3.9%);
+  --sidebar-primary: hsl(262.1 83.3% 57.8%);
+  --sidebar-primary-foreground: hsl(280 20% 98%);
+  --sidebar-accent: hsl(280 20% 95%);
+  --sidebar-accent-foreground: hsl(280 10% 3.9%);
+  --sidebar-border: hsl(280 20% 89%);
+  --sidebar-ring: hsl(262.1 83.3% 57.8%);
+  --sidebar: hsl(280 20% 98%);
+}
+
+/* Dark variants for colored themes */
+.dark.blue {
+  --background: hsl(220 13% 9%);
+  --foreground: hsl(210 40% 98%);
+  --card: hsl(220 13% 12%);
+  --card-foreground: hsl(210 40% 98%);
+  --muted: hsl(220 13% 15%);
+  --muted-foreground: hsl(215 20% 65%);
+  --accent: hsl(220 13% 15%);
+  --accent-foreground: hsl(210 40% 98%);
+  --border: hsl(220 13% 15%);
+  --primary: hsl(221.2 83.2% 53.3%);
+  --primary-foreground: hsl(210 40% 98%);
+}
+
+.dark.green {
+  --background: hsl(120 6% 9%);
+  --foreground: hsl(120 20% 98%);
+  --card: hsl(120 6% 12%);
+  --card-foreground: hsl(120 20% 98%);
+  --muted: hsl(120 6% 15%);
+  --muted-foreground: hsl(120 10% 65%);
+  --accent: hsl(120 6% 15%);
+  --accent-foreground: hsl(120 20% 98%);
+  --border: hsl(120 6% 15%);
+  --primary: hsl(142.1 76.2% 36.3%);
+  --primary-foreground: hsl(120 20% 98%);
+}
+
+.dark.purple {
+  --background: hsl(280 6% 9%);
+  --foreground: hsl(280 20% 98%);
+  --card: hsl(280 6% 12%);
+  --card-foreground: hsl(280 20% 98%);
+  --muted: hsl(280 6% 15%);
+  --muted-foreground: hsl(280 10% 65%);
+  --accent: hsl(280 6% 15%);
+  --accent-foreground: hsl(280 20% 98%);
+  --border: hsl(280 6% 15%);
+  --primary: hsl(262.1 83.3% 57.8%);
+  --primary-foreground: hsl(280 20% 98%);
+}
+
+@layer base {
+  :root {
+    font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    /* Scrollbar theme variables - set dynamically by ThemeProvider */
+    --scrollbar-thumb: #c9c9c9;
+    --scrollbar-track: transparent;
+    --scrollbar-thumb-hover: #a3a3a3;
+  }
+
+  html, body, #root {
+    height: 100%;
+  }
+
+  body {
+    margin: 0;
+    overflow: hidden;
+  }
+
+  *:not(input):not(textarea):not(select) {
+    border-color: hsl(var(--border));
+  }
+
+  * {
+    outline-color: hsl(var(--ring) / 0.5);
+  }
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+  }
+
+  /* Global scrollbar styling */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+  }
+
+  *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: var(--scrollbar-track);
+    border-radius: 4px;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+    border-radius: 4px;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-thumb-hover);
+  }
+
+  /* Hide scrollbar corner */
+  *::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+}
+
+/* Notes view scrollbar - uses custom properties set on the element */
+.notes-scroll {
+  --notes-scroll-thumb: var(--scrollbar-thumb);
+  --notes-scroll-track: transparent;
+  scrollbar-width: thin;
+  scrollbar-color: var(--notes-scroll-thumb) var(--notes-scroll-track);
+}
+
+.notes-scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.notes-scroll::-webkit-scrollbar-track {
+  background: var(--notes-scroll-track);
+}
+
+.notes-scroll::-webkit-scrollbar-thumb {
+  background: var(--notes-scroll-thumb);
+  border-radius: 4px;
+}
+
+.notes-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--notes-scroll-thumb);
+  opacity: 0.8;
+}
+
+/* ProseMirror Editor Styles - Scoped to Notes Plugin Only */
+.editor-content .ProseMirror {
+  outline: none;
+  min-height: 300px;
+  line-height: 1.7;
+  color: hsl(var(--foreground));
+  background: transparent;
+  border: none;
+}
+
+/* ProseMirror example-setup-style for lists */
+.editor-content .ProseMirror ul {
+  list-style-type: disc;
+}
+
+.editor-content .ProseMirror ol {
+  list-style-type: decimal;
+}
+
+.editor-content .ProseMirror ul ul {
+  list-style-type: circle;
+}
+
+.editor-content .ProseMirror ul ul ul {
+  list-style-type: square;
+}
+
+.editor-content .ProseMirror li {
+  display: list-item;
+  list-style-position: outside;
+  margin: 0.25em 0;
+}
+
+.editor-content .ProseMirror li > p:first-child {
+  margin-top: 0;
+}
+
+.editor-content .ProseMirror li > p:last-child {
+  margin-bottom: 0;
+}
+
+.editor-content .ProseMirror p {
+  margin: 1em 0;
+}
+
+.editor-content .ProseMirror p:first-child {
+  margin-top: 0;
+}
+
+.editor-content .ProseMirror p:last-child {
+  margin-bottom: 0;
+}
+
+.editor-content .ProseMirror h1,
+.editor-content .ProseMirror h2,
+.editor-content .ProseMirror h3,
+.editor-content .ProseMirror h4,
+.editor-content .ProseMirror h5,
+.editor-content .ProseMirror h6 {
+  font-weight: 600;
+  margin: 1.5em 0 0.5em 0;
+  color: hsl(var(--foreground));
+}
+
+.editor-content .ProseMirror h1:first-child,
+.editor-content .ProseMirror h2:first-child,
+.editor-content .ProseMirror h3:first-child,
+.editor-content .ProseMirror h4:first-child,
+.editor-content .ProseMirror h5:first-child,
+.editor-content .ProseMirror h6:first-child {
+  margin-top: 0;
+}
+
+.editor-content .ProseMirror h1 { font-size: 2em; }
+.editor-content .ProseMirror h2 { font-size: 1.5em; }
+.editor-content .ProseMirror h3 { font-size: 1.25em; }
+
+.editor-content .ProseMirror ul,
+.editor-content .ProseMirror ol {
+  padding-left: 2em;
+  margin: 1em 0;
+}
+
+.editor-content .ProseMirror blockquote {
+  border-left: 3px solid hsl(var(--border));
+  padding-left: 1em;
+  margin: 1.5em 0;
+  font-style: italic;
+  color: hsl(var(--muted-foreground));
+}
+
+.editor-content .ProseMirror code {
+  background: hsl(var(--muted));
+  color: hsl(var(--foreground));
+  padding: 0.125em 0.375em;
+  border-radius: 0.25em;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 0.875em;
+}
+
+.editor-content .ProseMirror pre {
+  background: hsl(var(--muted));
+  color: hsl(var(--foreground));
+  padding: 1em;
+  border-radius: 0.5em;
+  overflow-x: auto;
+  margin: 1.5em 0;
+  border: 1px solid hsl(var(--border));
+}
+
+.editor-content .ProseMirror pre code {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+  font-size: inherit;
+}
+
+.editor-content .ProseMirror hr {
+  border: none;
+  border-top: 1px solid hsl(var(--border));
+  margin: 2em 0;
+}
+
+.editor-content .ProseMirror strong {
+  font-weight: 600;
+}
+
+.editor-content .ProseMirror em {
+  font-style: italic;
+}
+
+/* ProseMirror Toolbar Styles - Scoped to Notes Plugin Only */
+.editor-content .ProseMirror-menubar {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 1px !important;
+  padding: 12px 16px !important;
+  border-bottom: 1px solid hsl(var(--border)) !important;
+  background: hsl(var(--background)) !important;
+  margin-bottom: 0 !important;
+  align-items: center !important;
+  backdrop-blur: 8px !important;
+  supports-backdrop-filter: bg-background/95 !important;
+}
+
+.editor-content .ProseMirror-menubar .ProseMirror-menuitem {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 6px 8px !important;
+  margin: 0 !important;
+  border: none !important;
+  border-radius: 6px !important;
+  background: transparent !important;
+  color: hsl(var(--muted-foreground)) !important;
+  cursor: pointer !important;
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  min-width: 32px !important;
+  height: 32px !important;
+  white-space: nowrap !important;
+  line-height: 1 !important;
+  box-sizing: border-box !important;
+  transition: all 0.2s ease !important;
+}
+
+.editor-content .ProseMirror-menubar .ProseMirror-menuitem:hover {
+  background: hsl(var(--accent)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+.editor-content .ProseMirror-menubar .ProseMirror-menuitem.ProseMirror-menu-active {
+  background: hsl(var(--accent)) !important;
+  color: hsl(var(--accent-foreground)) !important;
+  font-weight: 500 !important;
+}
+
+.editor-content .ProseMirror-menubar select.ProseMirror-menuitem {
+  padding: 6px 10px !important;
+  min-width: 90px !important;
+  border: 1px solid hsl(var(--border)) !important;
+  border-radius: 6px !important;
+  background: hsl(var(--background)) !important;
+  font-size: 12px !important;
+}
+
+.editor-content .ProseMirror-menubar select.ProseMirror-menuitem:hover {
+  border-color: hsl(var(--ring)) !important;
+}
+
+/* Fix for missing SVG icons - provide fallback text */
+.editor-content .ProseMirror-icon svg {
+  width: 1em !important;
+  height: 1em !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+}
+
+/* Ensure icons inherit text color */
+.editor-content .ProseMirror-menubar .ProseMirror-menuitem .ProseMirror-icon {
+  color: inherit !important;
+  fill: currentColor !important;
+}
+
+/* Dark mode specific fixes */
+.dark .editor-content .ProseMirror-menubar .ProseMirror-menuitem {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+.dark .editor-content .ProseMirror-menubar .ProseMirror-menuitem:hover {
+  color: hsl(var(--foreground)) !important;
+}
+
+.dark .editor-content .ProseMirror-menubar .ProseMirror-menuitem.ProseMirror-menu-active {
+  color: hsl(var(--accent-foreground)) !important;
+}
+
+/* Force SVG icon colors in dark mode */
+.dark .editor-content .ProseMirror-icon svg {
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  opacity: 1 !important;
+}
+
+/* Better contrast for dark mode elements */
+.dark .editor-content .ProseMirror-menubar {
+  border-bottom-color: hsl(240 3.7% 25%) !important;
+}
+
+.dark .editor-content .ProseMirror-menubar .ProseMirror-menuitem:hover {
+  background: hsl(240 3.7% 20%) !important;
+}
+
+.dark .editor-content .ProseMirror-menubar .ProseMirror-menuitem.ProseMirror-menu-active {
+  background: hsl(240 3.7% 25%) !important;
+}
+
+.dark .editor-content .ProseMirror-menubar select.ProseMirror-menuitem {
+  border-color: hsl(240 3.7% 25%) !important;
+  background: hsl(240 10% 6%) !important;
+}
+
+/* Fallback for missing icons */
+.editor-content .ProseMirror-menuitem[title="Select parent node"] .ProseMirror-icon::before {
+  content: "↑" !important;
+  font-weight: bold !important;
+}
+
+.editor-content .ProseMirror-menuitem[title="Lift out of enclosing block"] .ProseMirror-icon::before {
+  content: "↤" !important;
+  font-weight: bold !important;
+}
+
+.editor-content .ProseMirror-menuitem[title="Join with above block"] .ProseMirror-icon::before {
+  content: "↥" !important;
+  font-weight: bold !important;
+}
+
+/* Hide broken SVG elements when fallback is used */
+.editor-content .ProseMirror-menuitem[title="Select parent node"] .ProseMirror-icon svg,
+.editor-content .ProseMirror-menuitem[title="Lift out of enclosing block"] .ProseMirror-icon svg,
+.editor-content .ProseMirror-menuitem[title="Join with above block"] .ProseMirror-icon svg {
+  display: none !important;
+}
+
+/* Resource URI decorations (e.g., todo://task-123) */
+.editor-content .pm-resource-uri {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0 0.25rem;
+  border-radius: 0.25rem;
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--accent));
+  color: hsl(var(--foreground));
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 0.9em;
+}
+
+.editor-content .pm-resource-uri::before {
+  content: "";
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 0.125rem;
+  background: hsl(var(--primary));
+}
+
+/* Plugin color hints */
+.editor-content .pm-resource-uri[data-plugin="todo"]::before { background: #22c55e; }
+.editor-content .pm-resource-uri[data-plugin="note"]::before { background: #0ea5e9; }
+.editor-content .pm-resource-uri[data-plugin="canvas"]::before { background: #8b5cf6; }
+.editor-content .pm-resource-uri[data-plugin="tldraw"]::before { background: #ec4899; }
+.editor-content .pm-resource-uri[data-plugin="file"]::before { background: #64748b; }
+.editor-content .pm-resource-uri[data-plugin="cmd"]::before { background: #3b82f6; }
+.editor-content .pm-resource-uri[data-plugin="command"]::before { background: #3b82f6; }
+
+
+
+* {
+	box-sizing: border-box;
+	overscroll-behavior: none;
+}
+
+body {
+	font-family: 'Inter', sans-serif;
+}
+
+
+/* Chat Panel */
+
+.chat-panel.tl-theme__light {
+	--tl-color-text-2: hsl(0, 0%, 55%);
+	--tl-color-primary-hover: hsl(214, 84%, 58%);
+}
+
+.chat-panel.tl-theme__dark {
+	--tl-color-text-2: hsl(0, 0%, 55%);
+	--tl-color-primary-hover: hsl(214, 84%, 50%);
+}
+
+.chat-panel {
+	display: flex;
+	flex-direction: column;
+	height: calc(100vh - 40px);
+	font-size: 14px;
+	background-color: var(--tl-color-panel);
+	border-left: 1px solid var(--tl-color-low);
+	color: var(--tl-color-text-1);
+	font-family: 'Inter', sans-serif;
+	font-weight: 400;
+	font-size: 12px;
+	line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+	.chat-panel {
+		height: 50vh;
+		width: 100vw;
+	}
+}
+
+.chat-panel {
+	position: relative;
+}
+
+.chat-panel * {
+	user-select: text;
+}
+
+.chat-panel button {
+	user-select: none;
+}
+
+.chat-header {
+	display: flex;
+	justify-content: flex-end;
+}
+
+.new-chat-button {
+	width: 32px;
+	height: 32px;
+	font-size: 16px;
+	align-self: flex-end;
+	appearance: none;
+	border: 0;
+	border-radius: 4px;
+	cursor: pointer;
+	background: none;
+	margin: 2px;
+	color: var(--tl-color-text);
+}
+
+.new-chat-button:hover {
+	background-color: var(--tl-color-muted-2);
+}
+
+/* Chat Input */
+.chat-input-container {
+	display: flex;
+	flex-direction: column;
+	position: relative;
+}
+
+.chat-input {
+	padding: 0px 8px 8px 8px;
+	flex-shrink: 0;
+	position: sticky;
+	bottom: 0;
+	border-radius: 12px;
+	margin: 0px 8px 8px 8px;
+	padding: 0px;
+	background-color: var(--tl-color-panel);
+	z-index: 999999;
+}
+
+.chat-input form {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	padding: 8px;
+	border-radius: 12px;
+	color: var(--tl-color-text-2);
+	background-color: var(--tl-color-muted-1);
+	box-shadow: var(--tl-shadow-1);
+	font-size: 11px;
+}
+
+.chat-input input[type='text'] {
+	flex: 1;
+	padding: 8px 0px;
+	margin-bottom: 4px;
+	border: none;
+	background-color: transparent;
+	color: var(--tl-color-text);
+	border-radius: 4px;
+	font-size: 12px;
+	outline: none;
+	width: 100%;
+}
+
+.chat-input input[type='text']::placeholder {
+	color: var(--tl-color-text-3);
+}
+
+.chat-input input[type='text']:focus {
+	border-color: var(--tl-color-primary);
+}
+
+.chat-input textarea {
+	flex: 1;
+	padding: 8px 0px;
+	margin-bottom: 4px;
+	border: none;
+	background-color: transparent;
+	color: var(--tl-color-text);
+	font-family: sans-serif;
+	border-radius: 4px;
+	font-size: 12px;
+	outline: none;
+	width: 100%;
+	resize: none;
+	scrollbar-color: var(--tl-color-text-3) transparent;
+}
+
+.chat-input textarea::placeholder {
+	color: var(--tl-color-text-3);
+}
+
+.chat-input textarea:focus {
+	border-color: var(--tl-color-primary);
+}
+
+.chat-input textarea::-webkit-scrollbar {
+	width: 8px;
+	background: transparent;
+}
+
+.chat-input textarea::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+.chat-input textarea::-webkit-scrollbar-thumb {
+	background: var(--tl-color-text-3);
+	border-radius: 4px;
+}
+
+.chat-input-submit {
+	width: 16px;
+	height: 16px;
+	align-self: flex-end;
+	background: var(--tl-color-primary);
+	box-shadow: var(--tl-shadow-1);
+	color: var(--tl-color-panel-contrast);
+	appearance: none;
+	border: 0;
+	border-radius: 4px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	font-size: 10px;
+	text-align: center;
+	font-weight: 500;
+	border-radius: 100%;
+}
+
+.chat-input-submit:hover {
+	background: var(--tl-color-primary-hover);
+}
+
+.chat-input-submit:disabled {
+	background: var(--tl-color-grid);
+	cursor: not-allowed;
+}
+
+.chat-actions {
+	display: flex;
+	gap: 8px;
+	width: 100%;
+	justify-content: space-between;
+}
+
+.chat-actions-left {
+	display: flex;
+	gap: 0px;
+}
+
+.chat-icon {
+	width: 11px;
+	height: 11px;
+	margin-right: 4px;
+}
+
+.chat-mode-select {
+	display: flex;
+	align-items: center;
+	gap: 0px;
+}
+
+.chat-mode-select span {
+	margin-right: 4px;
+}
+
+.chat-context-select-label {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 10px;
+}
+
+.chat-model-select,
+.chat-context-select {
+	position: relative;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	padding: 0px 8px;
+}
+
+.chat-model-select-label {
+	display: flex;
+	align-items: center;
+	gap: 2px;
+	margin-left: -6px;
+}
+
+.chat-context-select {
+	border: 1px solid var(--tl-color-text-2);
+	padding: 0px 4px 0px 3px;
+	border-radius: 6px;
+	height: 18px;
+}
+
+.chat-model-select:hover,
+.chat-context-select:hover {
+	color: var(--tl-color-text);
+	border-color: var(--tl-color-text);
+}
+
+.chat-model-select select,
+.chat-context-select select {
+	opacity: 0;
+	position: absolute;
+	left: -1px;
+	right: -1px;
+	background-color: transparent;
+	border-radius: 6px;
+	padding: 2px 16px 2px 0px;
+	font-size: 11px;
+	border: none;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+	font-family: 'Inter', sans-serif;
+}
+
+.chat-context-select select {
+	cursor: pointer;
+	font-size: 10px;
+	font-weight: 500;
+	line-height: 1.5;
+}
+
+.chat-context-select.active {
+	background-color: var(--tl-color-primary);
+	color: black;
+	border-color: black;
+}
+
+.chat-context-select.active:hover {
+	background-color: var(--tl-color-primary);
+	color: var(--tl-color-text);
+	border-color: var(--tl-color-text);
+}
+
+/* Chat History */
+
+.chat-history {
+	padding: 0px 16px 32px 16px;
+	overflow-y: auto;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	height: 100%;
+	position: relative;
+	width: 100%;
+	scrollbar-width: 8px;
+	scrollbar-color: var(--tl-color-muted-1) transparent;
+}
+
+.chat-history::-webkit-scrollbar {
+	width: 8px;
+}
+
+.chat-history::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+.chat-history::-webkit-scrollbar-thumb {
+	background: var(--tl-color-muted-1);
+	border-radius: 4px;
+}
+
+.chat-history-section {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+	flex-shrink: 0;
+}
+
+.chat-history-section:last-child {
+	min-height: calc(100% - 1px);
+}
+
+.chat-history-prompt-container {
+	position: sticky;
+	top: -6px;
+	padding: 8px;
+	margin: -8px;
+	z-index: 9999;
+	background-color: var(--tl-color-panel);
+}
+
+.chat-history-prompt {
+	background-color: var(--tl-color-muted-1);
+	box-shadow: var(--tl-shadow-1);
+	color: var(--tl-color-text-1);
+	width: 100%;
+	font-family: 'Inter', sans-serif;
+	font-weight: 400;
+	font-size: 12px;
+	padding: 8px;
+	border-radius: 8px;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	white-space: pre-wrap;
+	max-height: 25vh;
+	overflow-y: auto;
+	scrollbar-color: var(--tl-color-text-3) transparent;
+}
+
+.chat-history-prompt::-webkit-scrollbar {
+	background: transparent;
+}
+
+.chat-history-prompt::-webkit-scrollbar-thumb {
+	background: var(--tl-color-text-3);
+}
+
+.chat-history-group {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+}
+
+.chat-history-group button {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	padding: 12px 0px;
+	margin: -12px 0px;
+	font-size: 12px;
+	font-family: 'Inter', sans-serif;
+	font-weight: 400;
+	color: var(--tl-color-text-2);
+	background-color: transparent;
+	border: none;
+	cursor: pointer;
+}
+
+.chat-history-group button:hover {
+	color: var(--tl-color-text);
+}
+
+.chat-history-group button:disabled {
+	color: var(--tl-color-text-1);
+	cursor: default;
+}
+
+.chat-history-change-acceptance {
+	display: flex;
+	justify-content: flex-end;
+	width: 100%;
+	gap: 2px;
+}
+
+.chat-history-change-acceptance button {
+	border: 0;
+	cursor: pointer;
+	background-color: var(--tl-color-muted-1);
+	color: var(--tl-color-text-2);
+	padding: 4px 8px;
+	font-size: 10px;
+	font-weight: 500;
+	cursor: pointer;
+	height: 20px;
+	user-select: none;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	flex-direction: row;
+	user-select: none;
+}
+
+.chat-history-change-acceptance button:hover {
+	color: var(--tl-color-text);
+}
+
+.chat-history-change-acceptance button:disabled {
+	color: var(--tl-color-text-1);
+	cursor: default;
+}
+
+.chat-history-change-acceptance button:first-child {
+	border-radius: 4px 0px 0px 0px;
+}
+
+.chat-history-change-acceptance button:last-child {
+	border-radius: 0px 4px 0px 0px;
+}
+
+/* Agent Actions */
+
+.agent-action {
+	display: flex;
+	align-items: flex-start;
+	gap: 4px;
+	font-size: 12px;
+	font-family: 'Inter', sans-serif;
+	font-weight: 400;
+	color: var(--tl-color-text-2);
+}
+
+.agent-action-description {
+	margin: 0;
+	width: 100%;
+}
+
+.agent-action-description > p:first-child {
+	margin-top: 0;
+}
+
+.agent-action-description > p:last-child {
+	margin-bottom: 0;
+}
+
+.agent-action-description p {
+	white-space: pre-wrap;
+}
+
+.agent-action-description ul,
+.agent-action-description ol {
+	padding-left: 20px;
+}
+
+.agent-action-description pre {
+	width: 100%;
+	overflow-x: scroll;
+}
+
+.agent-action-description blockquote {
+	padding-left: 14px;
+	border-left: 2px solid var(--tl-color-text-2);
+	margin: 0;
+}
+
+.agent-actions-container {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+.agent-changes {
+	background-color: var(--tl-color-muted-1);
+	padding: 6px 8px;
+	margin: 0px 0px;
+	border-radius: 4px 0px 0px 0px;
+	color: var(--tl-color-text-2);
+	max-height: 70px;
+	overflow-y: auto;
+	scrollbar-width: none;
+	-ms-overflow-style: none;
+}
+
+.agent-changes::-webkit-scrollbar {
+	display: none;
+}
+
+.agent-changes:last-child {
+	border-radius: 4px 0px 4px 4px;
+	max-height: 100%;
+}
+
+.agent-change {
+	display: flex;
+	align-items: flex-start;
+	gap: 4px;
+	font-size: 12px;
+	font-family: 'Inter', sans-serif;
+	font-weight: 400;
+}
+
+/* Prompt Tags */
+
+.prompt-tags {
+	display: flex;
+	gap: 4px;
+	align-items: center;
+	flex-wrap: wrap;
+}
+
+.prompt-tag {
+	display: flex;
+	align-items: center;
+	border-radius: 6px;
+	background-color: transparent;
+	font-size: 10px;
+	border: 1px solid var(--tl-color-text-2);
+	padding: 8px 4px 8px 3px;
+	font-weight: 500;
+	height: 16px;
+	color: var(--tl-color-text-2);
+	white-space: nowrap;
+	font-family: 'Inter', sans-serif;
+	max-width: 100%;
+}
+
+button.prompt-tag {
+	cursor: pointer;
+}
+
+button.prompt-tag:hover {
+	color: var(--tl-color-text);
+	border-color: var(--tl-color-text);
+}
+
+button.prompt-tag span {
+	user-select: none;
+}
+
+.prompt-tag span {
+	text-overflow: ellipsis;
+	overflow: hidden;
+}
+
+.prompt-tag svg {
+	flex-shrink: 0;
+}
+
+/* Diff viewer */
+
+.tldraw-viewer {
+	height: 100px;
+	position: relative;
+}
+
+.tldraw-viewer .tlui-tooltip {
+	display: none;
+}
+
+.diff-shape-create-shadow {
+	filter: drop-shadow(
+			calc(var(--tl-scale) * 1px) calc(var(--tl-scale) * 1px) 0px rgba(0, 200, 0, 50%)
+		)
+		drop-shadow(calc(var(--tl-scale) * -1px) calc(var(--tl-scale) * -1px) 0px rgba(0, 200, 0, 50%))
+		drop-shadow(calc(var(--tl-scale) * 1px) calc(var(--tl-scale) * -1px) 0px rgba(0, 200, 0, 50%))
+		drop-shadow(calc(var(--tl-scale) * -1px) calc(var(--tl-scale) * 1px) 0px rgba(0, 200, 0, 50%));
+}
+
+.diff-shape-delete-shadow {
+	filter: drop-shadow(
+			calc(var(--tl-scale) * 1px) calc(var(--tl-scale) * 1px) 0px rgba(200, 0, 0, 50%)
+		)
+		drop-shadow(calc(var(--tl-scale) * -1px) calc(var(--tl-scale) * -1px) 0px rgba(200, 0, 0, 50%))
+		drop-shadow(calc(var(--tl-scale) * 1px) calc(var(--tl-scale) * -1px) 0px rgba(200, 0, 0, 50%))
+		drop-shadow(calc(var(--tl-scale) * -1px) calc(var(--tl-scale) * 1px) 0px rgba(200, 0, 0, 50%));
+}
+
+.diff-shape-update-after-shadow {
+	filter: drop-shadow(
+			calc(var(--tl-scale) * 1px) calc(var(--tl-scale) * 1px) 0px rgba(0, 100, 255, 50%)
+		)
+		drop-shadow(
+			calc(var(--tl-scale) * -1px) calc(var(--tl-scale) * -1px) 0px rgba(0, 100, 255, 50%)
+		)
+		drop-shadow(calc(var(--tl-scale) * 1px) calc(var(--tl-scale) * -1px) 0px rgba(0, 100, 255, 50%))
+		drop-shadow(calc(var(--tl-scale) * -1px) calc(var(--tl-scale) * 1px) 0px rgba(0, 100, 255, 50%));
+}
+
+/* Chat History Fallback */
+
+.chat-fallback {
+	padding: 10px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-direction: column;
+	color: var(--tl-color-text-2);
+	user-select: none;
+	font-size: 14px;
+}
+
+.chat-fallback button {
+	background-color: hsl(214, 84%, 50%);
+	color: white;
+	border: none;
+	border-radius: 4px;
+	padding: 6px 12px;
+	font-weight: 500;
+	cursor: pointer;
+}
+
+.chat-fallback button:hover {
+	background-color: hsl(214, 84%, 40%);
+}
+
+/* Context Highlights */
+
+.context-highlight {
+	pointer-events: none;
+}
+
+.context-highlight line {
+	stroke-dasharray: 4px;
+	stroke-linecap: round;
+	stroke-width: 1px;
+}
+
+.context-highlight-generating line {
+	animation: dash 100s linear infinite;
+}
+
+.context-highlight circle {
+	stroke-width: 1px;
+	pointer-events: none;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
+.context-highlight-generating circle {
+	stroke-dasharray: 3px;
+	stroke-width: 2px;
+	fill: none;
+	animation: dash 100s linear infinite;
+}
+
+.context-highlight-label {
+	position: absolute;
+	color: var(--tl-color-text-shadow);
+	padding: 4px;
+	font-size: 12px;
+	background-color: var(--tl-color-tooltip);
+	border-radius: 0px 0px 6px 0px;
+	font-weight: 500;
+	white-space: nowrap;
+	margin-top: -0.5px;
+	margin-left: -0.5px;
+	pointer-events: none;
+	font-family: 'Inter', sans-serif;
+}
+
+@keyframes dash {
+	to {
+		stroke-dashoffset: -2000;
+	}
+}
+
+/* Todo list */
+
+.todo-list {
+	margin: 0px 16px -18px 16px;
+	background-color: var(--tl-color-panel);
+	border-radius: 12px 12px 0px 0px;
+	padding: 8px 4px 0 4px;
+	box-shadow: var(--tl-shadow-1);
+	border: 1px solid var(--tl-color-muted-2);
+	max-height: 120px;
+	overflow-y: auto;
+	flex-shrink: 0;
+	scrollbar-width: none;
+	-ms-overflow-style: none;
+	position: relative;
+	z-index: 99999;
+	transform: translateY(-16px);
+}
+
+.todo-list::-webkit-scrollbar {
+	display: none;
+}
+
+.todo-list-items {
+	display: flex;
+	flex-direction: column;
+}
+
+.todo-item {
+	display: flex;
+	align-items: flex-start;
+	gap: 8px;
+	padding-left: 4px;
+	border-radius: 6px;
+	font-size: 12px;
+	line-height: 1.3;
+}
+
+.todo-item-icon {
+	font-size: 10px;
+	width: 12px;
+	text-align: center;
+	flex-shrink: 0;
+	user-select: none;
+}
+
+.todo-item-text {
+	flex: 1;
+	color: var(--tl-color-text-3);
+	user-select: none;
+	padding-bottom: 8px;
+}
+
+.todo-item-todo .todo-item-icon {
+	color: var(--tl-color-text-3);
+}
+
+.todo-item-in-progress .todo-item-icon {
+	color: var(--tl-color-primary);
+}
+
+.todo-item-in-progress .todo-item-text {
+	font-weight: 500;
+	color: var(--tl-color-text);
+}
+
+.todo-item-done .todo-item-icon {
+	color: rgb(76, 200, 94);
+}
+
+.todo-item-done .todo-item-text {
+	color: var(--tl-color-text-2);
+	text-decoration: line-through;
+}
+
+.todo-item-delete {
+	appearance: none;
+	background: none;
+	border: none;
+	width: 16px;
+	height: 16px;
+	flex-shrink: 0;
+	display: flex;
+	padding: 12px;
+	padding-right: 14px;
+	margin-right: -3px;
+	margin-top: -3px;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	color: var(--tl-color-text-2);
+}
+
+.todo-item-delete:hover {
+	color: var(--tl-color-text);
+}
+
+/* Custom appearance for specific agent actions */
+
+.agent-action-type-message {
+	color: var(--tl-color-text-1);
+}
+
+/* macOS Custom Title Bar - Window Dragging */
+.app-drag-region {
+	-webkit-app-region: drag;
+}
+
+.app-no-drag {
+	-webkit-app-region: no-drag;
+}

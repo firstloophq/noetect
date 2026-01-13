@@ -1,0 +1,56 @@
+/* Tag link trigger highlight (while typing #tag) */
+.tag-link-trigger {
+    background-color: rgba(139, 92, 246, 0.15);
+    border-radius: 2px;
+}
+
+/* Completed tag styling */
+.tag-link {
+    color: var(--tag-color);
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    text-underline-offset: 2px;
+    cursor: pointer;
+    border-radius: 2px;
+}
+
+.tag-link:hover {
+    background-color: var(--tag-hover-bg);
+}
+
+/* Tag link popup container */
+.tag-link-popup {
+    position: fixed;
+    z-index: 1000;
+    min-width: 250px;
+    max-width: 350px;
+    max-height: 300px;
+    overflow-y: auto;
+    background: var(--surface-secondary);
+    border: 1px solid var(--border-default);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Tag link popup items */
+.tag-link-popup-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.tag-link-popup-item:hover,
+.tag-link-popup-item.selected {
+    background: var(--surface-accent);
+}
+
+.tag-link-popup-item .tag-name {
+    font-weight: 500;
+}
+
+.tag-link-popup-item .tag-count {
+    font-size: 12px;
+    color: var(--content-tertiary);
+}

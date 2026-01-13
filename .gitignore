@@ -1,0 +1,71 @@
+# dependencies (bun install)
+node_modules/
+**/node_modules/
+bun-sidecar/node_modules/
+
+# output
+out/
+dist/
+build/
+bundle/
+*.tgz
+
+# build artifacts
+**/build/
+**/dist/
+**/bundle/
+**/.next/
+**/.nuxt/
+**/coverage/
+
+# code coverage
+coverage/
+*.lcov
+
+# logs
+logs/
+*.log
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+env.private.json
+
+# dotenv environment variable files
+.env
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
+
+# caches
+.eslintcache
+.cache
+*.tsbuildinfo
+
+# IntelliJ based IDEs
+.idea
+
+# Finder (MacOS) folder config
+.DS_Store
+
+# macOS app build outputs
+mac-app/build/
+mac-app/bundle/
+mac-app/releases/
+mac-app/Frameworks/
+macos-app/build/
+macos-app/bundle/
+macos-app/bun-sidecar/dist/
+macos-app/bun-sidecar/node_modules/
+
+# Bun lock files and build outputs
+bun.lockb
+
+# Apple certificates and distribution files
+*.cer
+*.p12
+*.mobileprovision
+*.provisionprofile
+*.dmg
+*.pkg
+
+# Code signing
+*.entitlements.backup

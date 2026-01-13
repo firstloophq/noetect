@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
+  <channel>
+    <title>Noetect Updates</title>
+    <link>https://noetect.com/</link>
+    <description>Updates for Noetect</description>
+    <language>en</language>
+
+    <!-- Latest release (add new releases at the top) -->
+    <item>
+      <title>Version 0.1.0</title>
+      <pubDate>Mon, 13 Jan 2026 12:00:00 +0000</pubDate>
+      <sparkle:version>1</sparkle:version>
+      <sparkle:shortVersionString>0.1.0</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>12.0</sparkle:minimumSystemVersion>
+      <description><![CDATA[
+        <h2>Initial Release</h2>
+        <ul>
+          <li>First public release</li>
+        </ul>
+      ]]></description>
+      <enclosure
+        url="https://github.com/YOUR_ORG/noetect/releases/download/v0.1.0/Noetect-0.1.0.zip"
+        length="0"
+        type="application/octet-stream"
+        sparkle:edSignature="YOUR_SIGNATURE_HERE"
+      />
+    </item>
+
+    <!-- Add previous versions below for reference -->
+
+  </channel>
+</rss>

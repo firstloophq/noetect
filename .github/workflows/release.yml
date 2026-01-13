@@ -1,0 +1,228 @@
+name: Release macOS App
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version number (e.g., 0.2.0)'
+        required: true
+
+env:
+  APP_NAME: Noetect
+
+jobs:
+  build-and-release:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: |
+          cd bun-sidecar
+          bun install
+
+      - name: Determine version
+        id: version
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            VERSION="${GITHUB_REF#refs/tags/v}"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Building version: $VERSION"
+
+      - name: Update version in Info.plist
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          cd mac-app
+          /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" macos-host/Info.plist
+          # Extract build number from version (e.g., 0.2.0 -> 2, 1.0.0 -> 100)
+          BUILD_NUM=$(echo "$VERSION" | awk -F. '{print $1*100 + $2*10 + $3}')
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUM" macos-host/Info.plist
+
+      - name: Build app
+        run: |
+          cd mac-app
+          make build
+
+      - name: Import signing certificate
+        env:
+          CERTIFICATE_P12: ${{ secrets.APPLE_CERTIFICATE_P12 }}
+          CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+        run: |
+          # Create temporary keychain
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+          KEYCHAIN_PASSWORD=$(openssl rand -base64 32)
+
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+
+          # Import certificate
+          echo "$CERTIFICATE_P12" | base64 --decode > $RUNNER_TEMP/certificate.p12
+          security import $RUNNER_TEMP/certificate.p12 -P "$CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+          security list-keychain -d user -s "$KEYCHAIN_PATH"
+
+          # Allow codesign to access the key
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+
+      - name: Sign app
+        env:
+          CODESIGN_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+        run: |
+          cd mac-app
+
+          APP_PATH="bundle/Noetect.app"
+          ENTITLEMENTS="macos-host/entitlements.plist"
+
+          # Sign Sparkle framework
+          codesign --force --timestamp --options runtime \
+            --sign "$CODESIGN_IDENTITY" \
+            "$APP_PATH/Contents/Frameworks/Sparkle.framework/Versions/B/XPCServices/Installer.xpc"
+          codesign --force --timestamp --options runtime \
+            --sign "$CODESIGN_IDENTITY" \
+            "$APP_PATH/Contents/Frameworks/Sparkle.framework/Versions/B/Autoupdate"
+          codesign --force --timestamp --options runtime \
+            --sign "$CODESIGN_IDENTITY" \
+            "$APP_PATH/Contents/Frameworks/Sparkle.framework/Versions/B/Updater.app"
+          codesign --force --timestamp --options runtime \
+            --sign "$CODESIGN_IDENTITY" \
+            "$APP_PATH/Contents/Frameworks/Sparkle.framework"
+
+          # Sign sidecar and libs
+          if [[ -d "$APP_PATH/Contents/Resources/sidecar/lib" ]]; then
+            find "$APP_PATH/Contents/Resources/sidecar/lib" -name "*.dylib" -exec \
+              codesign --force --timestamp --options runtime --sign "$CODESIGN_IDENTITY" {} \;
+          fi
+
+          codesign --force --timestamp --options runtime \
+            --entitlements "$ENTITLEMENTS" \
+            --sign "$CODESIGN_IDENTITY" \
+            "$APP_PATH/Contents/Resources/sidecar/sidecar"
+
+          # Sign host binary
+          codesign --force --timestamp --options runtime \
+            --entitlements "$ENTITLEMENTS" \
+            --sign "$CODESIGN_IDENTITY" \
+            "$APP_PATH/Contents/MacOS/Noetect"
+
+          # Sign the app bundle
+          codesign --force --timestamp --options runtime \
+            --sign "$CODESIGN_IDENTITY" \
+            "$APP_PATH"
+
+          # Verify
+          codesign --verify --deep --strict --verbose=2 "$APP_PATH"
+
+      - name: Notarize app
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          cd mac-app
+          VERSION="${{ steps.version.outputs.version }}"
+          ZIP_NAME="Noetect-${VERSION}.zip"
+
+          # Create zip for notarization
+          ditto -c -k --keepParent "bundle/Noetect.app" "$ZIP_NAME"
+
+          # Submit for notarization
+          xcrun notarytool submit "$ZIP_NAME" \
+            --apple-id "$APPLE_ID" \
+            --password "$APPLE_APP_PASSWORD" \
+            --team-id "$APPLE_TEAM_ID" \
+            --wait
+
+          # Staple the ticket
+          xcrun stapler staple "bundle/Noetect.app"
+
+          # Re-create zip with stapled app
+          rm "$ZIP_NAME"
+          ditto -c -k --keepParent "bundle/Noetect.app" "$ZIP_NAME"
+
+      - name: Sign with Sparkle
+        env:
+          SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
+        run: |
+          cd mac-app
+          VERSION="${{ steps.version.outputs.version }}"
+          ZIP_NAME="Noetect-${VERSION}.zip"
+
+          # Sign with Sparkle and capture signature
+          SIGNATURE=$(echo "$SPARKLE_PRIVATE_KEY" | ./Frameworks/Sparkle/bin/sign_update "$ZIP_NAME" -f /dev/stdin 2>&1 | grep "sparkle:edSignature" | sed 's/.*sparkle:edSignature="\([^"]*\)".*/\1/')
+
+          # If that didn't work, try the simpler approach
+          if [[ -z "$SIGNATURE" ]]; then
+            SIGNATURE=$(echo "$SPARKLE_PRIVATE_KEY" | ./Frameworks/Sparkle/bin/sign_update "$ZIP_NAME" -f /dev/stdin)
+          fi
+
+          echo "SPARKLE_SIGNATURE=$SIGNATURE" >> $GITHUB_ENV
+          echo "Sparkle signature generated"
+
+      - name: Generate appcast entry
+        run: |
+          cd mac-app
+          VERSION="${{ steps.version.outputs.version }}"
+          ZIP_NAME="Noetect-${VERSION}.zip"
+          FILE_SIZE=$(stat -f%z "$ZIP_NAME")
+          PUB_DATE=$(date -R)
+
+          cat > appcast-entry.xml << EOF
+          <item>
+            <title>Version $VERSION</title>
+            <pubDate>$PUB_DATE</pubDate>
+            <sparkle:version>$VERSION</sparkle:version>
+            <sparkle:shortVersionString>$VERSION</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>12.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[
+              <h2>What's New in $VERSION</h2>
+              <p>See release notes on GitHub.</p>
+            ]]></description>
+            <enclosure
+              url="https://github.com/${{ github.repository }}/releases/download/v${VERSION}/${ZIP_NAME}"
+              length="$FILE_SIZE"
+              type="application/octet-stream"
+              sparkle:edSignature="$SPARKLE_SIGNATURE"
+            />
+          </item>
+          EOF
+
+          echo "=== Appcast Entry ==="
+          cat appcast-entry.xml
+          echo "===================="
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: Noetect v${{ steps.version.outputs.version }}
+          draft: true
+          files: |
+            mac-app/Noetect-${{ steps.version.outputs.version }}.zip
+            mac-app/appcast-entry.xml
+          body: |
+            ## Noetect v${{ steps.version.outputs.version }}
+
+            ### Installation
+            1. Download `Noetect-${{ steps.version.outputs.version }}.zip`
+            2. Unzip and drag Noetect.app to Applications
+
+            ### Auto-Update
+            Existing users will receive this update automatically.
+
+            ---
+
+            **Appcast entry** for `noetect.com/appcast.xml` is attached as `appcast-entry.xml`.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

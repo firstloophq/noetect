@@ -1,0 +1,319 @@
+import { useEffect, useState, useRef, useCallback } from "react";
+import { usePlugin } from "@/hooks/usePlugin";
+import { useWorkspaceContext } from "@/contexts/WorkspaceContext";
+import { Input } from "@/components/ui/input";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Search, FolderKanban, Clock, Circle, CheckCircle2, FileText } from "lucide-react";
+import { useTodosAPI } from "@/hooks/useTodosAPI";
+import { useNotesAPI } from "@/hooks/useNotesAPI";
+import { useTheme } from "@/hooks/useTheme";
+import { projectsPluginSerial } from "./index";
+import type { ProjectInfo } from "./index";
+import { cn } from "@/lib/utils";
+
+export function ProjectsBrowserView({ tabId }: { tabId: string }) {
+    if (!tabId) {
+        throw new Error("tabId is required");
+    }
+    const { activeTab, setTabName, addNewTab, setActiveTabId, getViewSelfPlacement, setSidebarTabId } = useWorkspaceContext();
+    const { loading, error, setLoading, setError } = usePlugin();
+    const [projects, setProjects] = useState<ProjectInfo[]>([]);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [selectedIndex, setSelectedIndex] = useState(0);
+    const { currentTheme } = useTheme();
+    const placement = getViewSelfPlacement(tabId);
+
+    const searchInputRef = useRef<HTMLInputElement>(null);
+    const hasSetTabNameRef = useRef<boolean>(false);
+    const listRef = useRef<HTMLDivElement>(null);
+
+    const todosAPI = useTodosAPI();
+    const notesAPI = useNotesAPI();
+
+    // Set tab name
+    useEffect(() => {
+        if (activeTab?.id === tabId && !hasSetTabNameRef.current) {
+            setTabName(tabId, "Projects");
+            hasSetTabNameRef.current = true;
+        }
+    }, [activeTab?.id, tabId, setTabName]);
+
+    // Auto-focus search input when tab becomes active
+    useEffect(() => {
+        if (activeTab?.id === tabId && !loading) {
+            requestAnimationFrame(() => {
+                searchInputRef.current?.focus();
+            });
+        }
+    }, [activeTab?.id, tabId, loading]);
+
+    // Load projects with todo and notes counts
+    useEffect(() => {
+        const fetchProjects = async () => {
+            try {
+                setLoading(true);
+                setError(null);
+
+                // Get list of projects and all data
+                const [projectNames, allTodos, allNotes] = await Promise.all([
+                    todosAPI.getProjects(),
+                    todosAPI.getTodos(),
+                    notesAPI.getNotes(),
+                ]);
+
+                // Calculate stats per project
+                const projectInfos: ProjectInfo[] = projectNames.map((name) => {
+                    const projectTodos = allTodos.filter((t) => t.project === name);
+                    const projectNotes = allNotes.filter((n) => n.frontMatter?.project === name);
+
+                    return {
+                        name,
+                        todoCount: projectTodos.filter((t) => t.status === "todo").length,
+                        inProgressCount: projectTodos.filter((t) => t.status === "in_progress").length,
+                        doneCount: projectTodos.filter((t) => t.status === "done").length,
+                        notesCount: projectNotes.length,
+                    };
+                });
+
+                // Sort by in-progress + todo count (most active first), then alphabetically
+                projectInfos.sort((a, b) => {
+                    const activeA = a.inProgressCount + a.todoCount;
+                    const activeB = b.inProgressCount + b.todoCount;
+                    if (activeB !== activeA) return activeB - activeA;
+                    return a.name.localeCompare(b.name);
+                });
+
+                setProjects(projectInfos);
+            } catch (err) {
+                const errorMessage = err instanceof Error ? err.message : "Failed to fetch projects";
+                setError(errorMessage);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchProjects();
+    }, [todosAPI, notesAPI, setLoading, setError]);
+
+    // Filter projects based on search
+    const filteredProjects = searchQuery
+        ? projects.filter((p) => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
+        : projects;
+
+    // Open project detail view
+    const handleOpenProject = useCallback(
+        async (projectName: string) => {
+            const newTab = await addNewTab({
+                pluginMeta: projectsPluginSerial,
+                view: "detail",
+                props: { projectName },
+            });
+            if (newTab) {
+                if (placement === "sidebar") {
+                    setSidebarTabId(newTab.id);
+                } else {
+                    setActiveTabId(newTab.id);
+                }
+            }
+        },
+        [addNewTab, placement, setActiveTabId, setSidebarTabId]
+    );
+
+    // Keyboard navigation
+    const handleKeyDown = useCallback(
+        (e: React.KeyboardEvent) => {
+            if (filteredProjects.length === 0) return;
+
+            switch (e.key) {
+                case "ArrowDown":
+                    e.preventDefault();
+                    setSelectedIndex((prev) => Math.min(prev + 1, filteredProjects.length - 1));
+                    break;
+                case "ArrowUp":
+                    e.preventDefault();
+                    setSelectedIndex((prev) => Math.max(prev - 1, 0));
+                    break;
+                case "Enter":
+                    e.preventDefault();
+                    {
+                        const selectedProject = filteredProjects[selectedIndex];
+                        if (selectedProject) {
+                            handleOpenProject(selectedProject.name);
+                        }
+                    }
+                    break;
+            }
+        },
+        [filteredProjects, selectedIndex, handleOpenProject]
+    );
+
+    // Reset selection when search changes
+    useEffect(() => {
+        setSelectedIndex(0);
+    }, [searchQuery]);
+
+    // Scroll selected item into view
+    useEffect(() => {
+        if (listRef.current) {
+            const selectedItem = listRef.current.querySelector(`[data-index="${selectedIndex}"]`);
+            selectedItem?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+        }
+    }, [selectedIndex]);
+
+    if (loading) {
+        return (
+            <div className="h-full flex items-center justify-center">
+                <div className="text-muted-foreground">Loading projects...</div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="p-4">
+                <Alert variant="destructive">
+                    <AlertDescription>Error: {error}</AlertDescription>
+                </Alert>
+            </div>
+        );
+    }
+
+    return (
+        <div
+            className="h-full flex flex-col"
+            style={{ backgroundColor: currentTheme.styles.surfacePrimary }}
+        >
+            {/* Header with search */}
+            <div
+                className="sticky top-0 z-10 px-4 py-3 border-b"
+                style={{
+                    backgroundColor: currentTheme.styles.surfacePrimary,
+                    borderColor: currentTheme.styles.borderDefault,
+                }}
+            >
+                <div className="flex items-center gap-3 mb-3">
+                    <FolderKanban
+                        size={20}
+                        style={{ color: currentTheme.styles.contentAccent }}
+                    />
+                    <h1
+                        className="text-xl font-semibold"
+                        style={{ color: currentTheme.styles.contentPrimary }}
+                    >
+                        Projects
+                    </h1>
+                    <span
+                        className="text-sm"
+                        style={{ color: currentTheme.styles.contentTertiary }}
+                    >
+                        ({projects.length})
+                    </span>
+                </div>
+
+                <div className="relative">
+                    <Search
+                        className="absolute left-3 top-1/2 -translate-y-1/2"
+                        size={16}
+                        style={{ color: currentTheme.styles.contentTertiary }}
+                    />
+                    <Input
+                        ref={searchInputRef}
+                        type="text"
+                        placeholder="Search projects..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onKeyDown={handleKeyDown}
+                        className="pl-9"
+                        style={{
+                            backgroundColor: currentTheme.styles.surfaceSecondary,
+                            borderColor: currentTheme.styles.borderDefault,
+                            color: currentTheme.styles.contentPrimary,
+                        }}
+                    />
+                </div>
+            </div>
+
+            {/* Projects list */}
+            <div
+                ref={listRef}
+                className="flex-1 overflow-y-auto p-2"
+            >
+                {filteredProjects.length === 0 ? (
+                    <div
+                        className="text-center py-8"
+                        style={{ color: currentTheme.styles.contentTertiary }}
+                    >
+                        {searchQuery ? "No projects found" : "No projects yet"}
+                    </div>
+                ) : (
+                    <div className="space-y-1">
+                        {filteredProjects.map((project, index) => (
+                            <button
+                                key={project.name}
+                                data-index={index}
+                                onClick={() => handleOpenProject(project.name)}
+                                className={cn(
+                                    "w-full flex items-center justify-between px-3 py-2.5 rounded-md transition-colors text-left",
+                                    "hover:bg-accent/50 focus:outline-none focus:ring-2 focus:ring-offset-1"
+                                )}
+                                style={{
+                                    backgroundColor: index === selectedIndex
+                                        ? currentTheme.styles.surfaceAccent
+                                        : "transparent",
+                                    color: currentTheme.styles.contentPrimary,
+                                }}
+                            >
+                                <div className="flex items-center gap-2">
+                                    <FolderKanban
+                                        size={14}
+                                        style={{ color: currentTheme.styles.contentAccent }}
+                                    />
+                                    <span className="font-medium">{project.name}</span>
+                                </div>
+                                <div className="flex items-center gap-3 text-xs">
+                                    {project.notesCount > 0 && (
+                                        <span
+                                            className="flex items-center gap-1 mr-2"
+                                            style={{ color: currentTheme.styles.contentTertiary }}
+                                        >
+                                            <FileText size={12} />
+                                            {project.notesCount}
+                                        </span>
+                                    )}
+                                    {project.inProgressCount > 0 && (
+                                        <span
+                                            className="flex items-center gap-1"
+                                            style={{ color: currentTheme.styles.contentAccent }}
+                                        >
+                                            <Clock size={12} />
+                                            {project.inProgressCount}
+                                        </span>
+                                    )}
+                                    {project.todoCount > 0 && (
+                                        <span
+                                            className="flex items-center gap-1"
+                                            style={{ color: currentTheme.styles.contentSecondary }}
+                                        >
+                                            <Circle size={12} />
+                                            {project.todoCount}
+                                        </span>
+                                    )}
+                                    {project.doneCount > 0 && (
+                                        <span
+                                            className="flex items-center gap-1"
+                                            style={{ color: currentTheme.styles.semanticSuccess }}
+                                        >
+                                            <CheckCircle2 size={12} />
+                                            {project.doneCount}
+                                        </span>
+                                    )}
+                                </div>
+                            </button>
+                        ))}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}
+
+export default ProjectsBrowserView;

@@ -1,0 +1,74 @@
+/* Wiki Link Styles */
+
+/* The wiki link itself */
+.wiki-link {
+    color: inherit;
+    text-decoration: none;
+    padding: 0 2px;
+    border-radius: 3px;
+    background-color: rgba(59, 130, 246, 0.1);
+    border-bottom: 1px solid rgba(59, 130, 246, 0.3);
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.wiki-link:hover {
+    background-color: rgba(59, 130, 246, 0.2);
+    border-bottom-color: rgba(59, 130, 246, 0.5);
+}
+
+/* Broken/missing link */
+.wiki-link.broken {
+    color: inherit;
+    opacity: 0.6;
+    border-bottom-style: dashed;
+}
+
+/* The [[ trigger text while typing */
+.wiki-link-trigger {
+    background-color: rgba(59, 130, 246, 0.15);
+    border-radius: 3px;
+}
+
+/* Wiki link popup */
+.wiki-link-popup {
+    position: fixed;
+    z-index: 1000;
+    min-width: 300px;
+    max-width: 400px;
+    max-height: 300px;
+    overflow-y: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.wiki-link-popup-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background-color 0.1s ease;
+}
+
+.wiki-link-popup-item:hover,
+.wiki-link-popup-item.selected {
+    background-color: rgba(59, 130, 246, 0.1);
+}
+
+.wiki-link-popup-item .title {
+    font-weight: 500;
+}
+
+.wiki-link-popup-item .tags {
+    font-size: 0.75rem;
+    opacity: 0.7;
+    margin-top: 2px;
+}
+
+/* Keyboard hints in footer */
+.wiki-link-popup kbd {
+    display: inline-block;
+    padding: 2px 5px;
+    font-size: 0.7rem;
+    font-family: inherit;
+    background-color: rgba(128, 128, 128, 0.2);
+    border-radius: 3px;
+}
