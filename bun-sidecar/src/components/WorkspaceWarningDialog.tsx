@@ -66,7 +66,7 @@ export function WorkspaceWarningDialog({
                                 style={{ color: warningColor }}
                             />
                         </div>
-                        <DialogTitle>Welcome to the Noetect Alpha</DialogTitle>
+                        <DialogTitle>Welcome to the Noetect Alpha!</DialogTitle>
                     </div>
                     <DialogDescription className="sr-only">
                         Welcome to the Noetect Alpha with backup recommendations
