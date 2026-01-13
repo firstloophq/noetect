@@ -84,17 +84,21 @@ jobs:
 
           APP_PATH="bundle/Noetect.app"
           ENTITLEMENTS="macos-host/entitlements.plist"
+          SPARKLE="$APP_PATH/Contents/Frameworks/Sparkle.framework/Versions/B"
 
-          # Sign Sparkle framework
+          # Sign all Sparkle XPC services and helpers (innermost first)
           codesign --force --timestamp --options runtime \
             --sign "$CODESIGN_IDENTITY" \
-            "$APP_PATH/Contents/Frameworks/Sparkle.framework/Versions/B/XPCServices/Installer.xpc"
+            "$SPARKLE/XPCServices/Downloader.xpc"
           codesign --force --timestamp --options runtime \
             --sign "$CODESIGN_IDENTITY" \
-            "$APP_PATH/Contents/Frameworks/Sparkle.framework/Versions/B/Autoupdate"
+            "$SPARKLE/XPCServices/Installer.xpc"
           codesign --force --timestamp --options runtime \
             --sign "$CODESIGN_IDENTITY" \
-            "$APP_PATH/Contents/Frameworks/Sparkle.framework/Versions/B/Updater.app"
+            "$SPARKLE/Autoupdate"
+          codesign --force --timestamp --options runtime \
+            --sign "$CODESIGN_IDENTITY" \
+            "$SPARKLE/Updater.app"
           codesign --force --timestamp --options runtime \
             --sign "$CODESIGN_IDENTITY" \
             "$APP_PATH/Contents/Frameworks/Sparkle.framework"

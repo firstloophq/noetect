@@ -99,6 +99,9 @@ if [[ -d "$SPARKLE_FRAMEWORK" ]]; then
   log "[release] Signing Sparkle.framework..."
   run codesign --force --timestamp --options runtime \
     --sign "$CODESIGN_IDENTITY" \
+    "$SPARKLE_FRAMEWORK/Versions/B/XPCServices/Downloader.xpc" || true
+  run codesign --force --timestamp --options runtime \
+    --sign "$CODESIGN_IDENTITY" \
     "$SPARKLE_FRAMEWORK/Versions/B/XPCServices/Installer.xpc" || true
   run codesign --force --timestamp --options runtime \
     --sign "$CODESIGN_IDENTITY" \
