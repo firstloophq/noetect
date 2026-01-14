@@ -137,17 +137,20 @@ export function createGitClient(config: GitClientConfig) {
                 // WORKDIR: 0 = absent, 1 = identical to HEAD, 2 = different
                 // STAGE: 0 = absent, 1 = identical to HEAD, 2 = identical to WORKDIR, 3 = different from both
 
-                if (head === 0 && workdir === 2) {
+                // Untracked: not in HEAD, but present in workdir (not staged)
+                if (head === 0 && workdir === 2 && stage === 0) {
                     changedFiles.push({ path: filepath, status: "untracked" });
-                } else if (head === 0 && stage === 2) {
+                }
+                // Added: not in HEAD, but staged
+                else if (head === 0 && stage !== 0) {
                     changedFiles.push({ path: filepath, status: "added" });
-                } else if (head === 1 && workdir === 0) {
+                }
+                // Deleted: in HEAD, but not in workdir
+                else if (head === 1 && workdir === 0) {
                     changedFiles.push({ path: filepath, status: "deleted" });
-                } else if (head === 1 && workdir === 2) {
-                    changedFiles.push({ path: filepath, status: "modified" });
-                } else if (stage === 2 && head !== stage) {
-                    changedFiles.push({ path: filepath, status: "modified" });
-                } else if (stage === 3) {
+                }
+                // Modified: in HEAD, but different in workdir or stage
+                else if (head === 1 && (workdir === 2 || stage === 2 || stage === 3)) {
                     changedFiles.push({ path: filepath, status: "modified" });
                 }
             }
