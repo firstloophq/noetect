@@ -27,6 +27,7 @@ import {
     ToolInput,
     ToolOutput,
 } from "@/components/ai-elements/tool";
+import { RenderedUI, parseNoetectUIData } from "@/components/ai-elements/rendered-ui";
 import {
     ChainOfThought,
     ChainOfThoughtContent,
@@ -828,6 +829,21 @@ export default function ChatView({ sessionId: initialSessionId, tabId, initialPr
 
                                     if (block.type === "tool") {
                                         const toolCall = block.toolCall;
+
+                                        // Check if this is a render_ui tool with UI data
+                                        const uiData = parseNoetectUIData(toolCall.output);
+                                        if (uiData) {
+                                            return (
+                                                <div key={block.id} className="mb-2">
+                                                    <RenderedUI
+                                                        html={uiData.html}
+                                                        title={uiData.title}
+                                                        height={uiData.height}
+                                                    />
+                                                </div>
+                                            );
+                                        }
+
                                         return (
                                             <Tool key={block.id} defaultOpen={false} className="mb-2">
                                                 <ToolHeader

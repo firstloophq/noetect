@@ -9,6 +9,7 @@ import { listUserMcpServers, expandEnvVars } from "@/features/mcp-servers/fx";
 import type { AgentConfig } from "@/features/agents/index";
 import { createServiceLogger } from "@/lib/logger";
 import { secrets } from "@/lib/secrets";
+import { uiRendererServer } from "@/mcp-servers/ui-renderer";
 
 // Create logger for chat routes
 const chatLogger = createServiceLogger("CHAT");
@@ -405,6 +406,9 @@ export const chatRoutes = {
                 // Build MCP servers from agent config
                 const mcpServers = await buildMcpServersFromConfig(agentConfig.mcpServers);
 
+                // Add the UI renderer server for skills to render custom UI
+                mcpServers["noetect-ui"] = uiRendererServer;
+
                 // Find Claude CLI path - check common locations
                 const claudeCliPath = process.env.CLAUDE_CLI_PATH
                     || `${process.env.HOME}/.local/bin/claude`;
@@ -435,14 +439,16 @@ export const chatRoutes = {
                     sdkOptions.systemPrompt = agentConfig.systemPrompt;
                 }
 
+                // Log MCP server names (can't stringify SDK servers due to cyclic refs)
+                const mcpServerNames = Object.keys(mcpServers);
                 console.log("[API] SDK options:", {
                     ...sdkOptions,
                     resume: sessionId || "(new session)",
                     systemPrompt: sdkOptions.systemPrompt ? "(custom)" : "(default)",
-                    mcpServers: mcpServers,
+                    mcpServers: mcpServerNames,
                     pathToClaudeCodeExecutable: claudeCliPath,
                 });
-                console.log("[API] mcpServers being passed to SDK:", JSON.stringify(mcpServers, null, 2));
+                console.log("[API] mcpServers being passed to SDK:", mcpServerNames);
 
                 let queryIterator: AsyncIterable<SDKMessage>;
                 // Generate a temporary ID for tracking if no session yet
