@@ -140,7 +140,7 @@ function ChangedFilesList({ status }: { status: string }) {
 function SyncContent() {
     const navigate = useNavigate();
     const { addNewTab, setActiveTabId } = useWorkspaceContext();
-    const { status: syncStatus, setupStatus, needsSetup, checkForChanges, sync, recheckSetup, gitAuthMode, setGitAuthMode } = useGHSync();
+    const { status: syncStatus, setupStatus, needsSetup, checkForChanges, sync, recheckSetup, gitAuthMode, setGitAuthMode, autoSync, setAutoSyncConfig } = useGHSync();
     const [gitStatus, setGitStatus] = useState<GitStatus | null>(null);
     const [loading, setLoading] = useState(true);
     const [repoUrl, setRepoUrl] = useState("");
@@ -448,6 +448,93 @@ After you provide the merged content, I will manually update the file and mark t
                             PAT
                         </button>
                     </div>
+                </div>
+            </div>
+
+            {/* Auto-Sync Settings */}
+            <div className="mb-6 border rounded-lg p-4 space-y-4">
+                <div>
+                    <div className="text-sm font-medium mb-3">Auto-Sync Settings</div>
+                    
+                    {/* Enable Auto-Sync */}
+                    <div className="flex items-center justify-between py-2">
+                        <div>
+                            <div className="text-sm">Enable Auto-Sync</div>
+                            <p className="text-xs text-muted-foreground">
+                                Automatically sync on a schedule
+                            </p>
+                        </div>
+                        <button
+                            onClick={() => setAutoSyncConfig({ enabled: !autoSync.enabled })}
+                            className={`relative w-11 h-6 rounded-full transition-colors ${
+                                autoSync.enabled ? "bg-primary" : "bg-muted"
+                            }`}
+                        >
+                            <div
+                                className={`absolute top-0.5 left-0.5 w-5 h-5 bg-background rounded-full transition-transform ${
+                                    autoSync.enabled ? "translate-x-5" : "translate-x-0"
+                                }`}
+                            />
+                        </button>
+                    </div>
+
+                    {/* Sync on Changes */}
+                    {autoSync.enabled && (
+                        <div className="flex items-center justify-between py-2 border-t">
+                            <div>
+                                <div className="text-sm">Sync on Changes</div>
+                                <p className="text-xs text-muted-foreground">
+                                    Automatically sync when files change (5s debounce)
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => setAutoSyncConfig({ syncOnChanges: !autoSync.syncOnChanges })}
+                                className={`relative w-11 h-6 rounded-full transition-colors ${
+                                    autoSync.syncOnChanges ? "bg-primary" : "bg-muted"
+                                }`}
+                            >
+                                <div
+                                    className={`absolute top-0.5 left-0.5 w-5 h-5 bg-background rounded-full transition-transform ${
+                                        autoSync.syncOnChanges ? "translate-x-5" : "translate-x-0"
+                                    }`}
+                                />
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Sync Interval */}
+                    {autoSync.enabled && (
+                        <div className="py-2 border-t">
+                            <Label className="text-sm mb-2 block">Sync Interval (seconds)</Label>
+                            <div className="flex items-center gap-2">
+                                <Input
+                                    type="number"
+                                    min="10"
+                                    max="3600"
+                                    value={autoSync.intervalSeconds}
+                                    onChange={(e) => {
+                                        const value = parseInt(e.target.value, 10);
+                                        if (value >= 10 && value <= 3600) {
+                                            setAutoSyncConfig({ intervalSeconds: value });
+                                        }
+                                    }}
+                                    className="w-24 text-sm"
+                                />
+                                <span className="text-xs text-muted-foreground">
+                                    (min: 10, max: 3600)
+                                </span>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Last Synced Info */}
+                    {autoSync.enabled && syncStatus.lastSynced && (
+                        <div className="pt-2 border-t">
+                            <p className="text-xs text-muted-foreground">
+                                Last synced: {syncStatus.lastSynced.toLocaleTimeString()}
+                            </p>
+                        </div>
+                    )}
                 </div>
             </div>
 
