@@ -28,7 +28,7 @@ import { WorkspaceSidebar } from "@/components/WorkspaceSidebar";
 import { useTheme } from "@/hooks/useTheme";
 import { useAgentsAPI } from "@/hooks/useAgentsAPI";
 import type { AgentConfig, McpServerDefinition } from "@/features/agents/index";
-import { MODEL_DISPLAY_NAMES } from "@/features/agents/index";
+import { MODEL_DISPLAY_NAMES, PREDEFINED_MODELS } from "@/features/agents/index";
 import { Plus, Pencil, Trash2, Copy, Bot } from "lucide-react";
 
 type AgentModel = AgentConfig["model"];
@@ -52,6 +52,7 @@ function AgentsContent() {
     const [formSystemPrompt, setFormSystemPrompt] = useState("");
     const [formModel, setFormModel] = useState<AgentModel>("claude-sonnet-4-5-20250929");
     const [formMcpServers, setFormMcpServers] = useState<string[]>([]);
+    const [useCustomModel, setUseCustomModel] = useState(false);
 
     // Load agents and MCP registry on mount
     useEffect(() => {
@@ -82,6 +83,7 @@ function AgentsContent() {
         setFormSystemPrompt("");
         setFormModel("claude-sonnet-4-5-20250929");
         setFormMcpServers([]);
+        setUseCustomModel(false);
         setIsDialogOpen(true);
     }
 
@@ -92,6 +94,8 @@ function AgentsContent() {
         setFormSystemPrompt(agent.systemPrompt);
         setFormModel(agent.model);
         setFormMcpServers([...agent.mcpServers]);
+        // Check if the model is a predefined one
+        setUseCustomModel(!PREDEFINED_MODELS.includes(agent.model as typeof PREDEFINED_MODELS[number]));
         setIsDialogOpen(true);
     }
 
@@ -254,7 +258,7 @@ function AgentsContent() {
                                 <div>
                                     <span style={{ color: currentTheme.styles.contentSecondary }}>Model: </span>
                                     <span style={{ color: currentTheme.styles.contentPrimary }}>
-                                        {MODEL_DISPLAY_NAMES[agent.model]}
+                                        {MODEL_DISPLAY_NAMES[agent.model] || agent.model}
                                     </span>
                                 </div>
                                 <div>
@@ -318,19 +322,52 @@ function AgentsContent() {
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="model">Model</Label>
-                            <Select value={formModel} onValueChange={(value) => setFormModel(value as AgentModel)}>
-                                <SelectTrigger>
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {Object.entries(MODEL_DISPLAY_NAMES).map(([value, label]) => (
-                                        <SelectItem key={value} value={value}>
-                                            {label}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                            <div className="flex items-center justify-between">
+                                <Label htmlFor="model">Model</Label>
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-auto py-1 px-2 text-xs"
+                                    onClick={() => {
+                                        setUseCustomModel(!useCustomModel);
+                                        if (useCustomModel) {
+                                            // Switching back to predefined, reset to default if current model is not predefined
+                                            if (!PREDEFINED_MODELS.includes(formModel as typeof PREDEFINED_MODELS[number])) {
+                                                setFormModel("claude-sonnet-4-5-20250929");
+                                            }
+                                        }
+                                    }}
+                                >
+                                    {useCustomModel ? "Use predefined" : "Enter custom"}
+                                </Button>
+                            </div>
+                            {useCustomModel ? (
+                                <>
+                                    <Input
+                                        id="model"
+                                        value={formModel}
+                                        onChange={(e) => setFormModel(e.target.value)}
+                                        placeholder="e.g., claude-opus-4-5-20251101"
+                                    />
+                                    <p className="text-xs" style={{ color: currentTheme.styles.contentSecondary }}>
+                                        Enter a custom model identifier. Use this for newer models not yet in the list.
+                                    </p>
+                                </>
+                            ) : (
+                                <Select value={formModel} onValueChange={(value) => setFormModel(value as AgentModel)}>
+                                    <SelectTrigger>
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {Object.entries(MODEL_DISPLAY_NAMES).map(([value, label]) => (
+                                            <SelectItem key={value} value={value}>
+                                                {label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            )}
                         </div>
 
                         <div className="space-y-2">
