@@ -24,6 +24,7 @@ export const workspaceRoutes = {
                         themeName: "Light",
                         projectPreferences: {},
                         gitAuthMode: "local",
+                        autoSync: { enabled: true, syncOnChanges: true, intervalSeconds: 60 },
                     };
                     await Bun.write(`${getNoetectPath()}/workspace.json`, JSON.stringify(defaultWorkspace, null, 2));
 
@@ -135,6 +136,7 @@ export const workspaceRoutes = {
                         themeName: "Light",
                         projectPreferences: {},
                         gitAuthMode: "local",
+                        autoSync: { enabled: true, syncOnChanges: true, intervalSeconds: 60 },
                     };
                 }
 

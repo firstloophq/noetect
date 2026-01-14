@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
 import { useWorkspaceContext } from "./WorkspaceContext";
-import { GitAuthMode } from "@/types/Workspace";
+import { GitAuthMode, AutoSyncConfig } from "@/types/Workspace";
 
 interface SyncStatus {
     checking: boolean;
@@ -9,6 +9,7 @@ interface SyncStatus {
     aheadCount: number;
     hasMergeConflict: boolean;
     lastChecked: Date | null;
+    lastSynced: Date | null;
     error: string | null;
 }
 
@@ -30,15 +31,17 @@ interface GHSyncContextValue {
     needsSetup: boolean; // true if PAT is missing (when using PAT auth) or git not configured
     gitAuthMode: GitAuthMode;
     setGitAuthMode: (mode: GitAuthMode) => void;
+    autoSync: AutoSyncConfig;
+    setAutoSyncConfig: (config: Partial<AutoSyncConfig>) => void;
 }
 
 const GHSyncContext = createContext<GHSyncContextValue | null>(null);
 
-const POLL_INTERVAL = 60 * 1000; // 1 minute
+const CHANGE_DEBOUNCE_MS = 5000; // 5 seconds - batching window for local changes
 
 export function GHSyncProvider(props: { children: React.ReactNode }) {
     const { children } = props;
-    const { gitAuthMode, setGitAuthMode } = useWorkspaceContext();
+    const { gitAuthMode, setGitAuthMode, autoSync, setAutoSyncConfig } = useWorkspaceContext();
     const [isReady, setIsReady] = useState(false);
     const [status, setStatus] = useState<SyncStatus>({
         checking: false,
@@ -47,6 +50,7 @@ export function GHSyncProvider(props: { children: React.ReactNode }) {
         aheadCount: 0,
         hasMergeConflict: false,
         lastChecked: null,
+        lastSynced: null,
         error: null,
     });
     const [setupStatus, setSetupStatus] = useState<SetupStatus>({
@@ -58,6 +62,8 @@ export function GHSyncProvider(props: { children: React.ReactNode }) {
     });
     const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const syncRef = useRef<(() => Promise<void>) | null>(null);
+    const changeDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const fileWatcherRef = useRef<{ stop: () => void } | null>(null);
 
     // Check if GitHub PAT is set
     const checkPAT = useCallback(async (): Promise<boolean> => {
@@ -226,6 +232,7 @@ export function GHSyncProvider(props: { children: React.ReactNode }) {
                 behindCount: 0,
                 aheadCount: 0,
                 lastChecked: new Date(),
+                lastSynced: new Date(),
             }));
         } catch (error) {
             setStatus(s => ({
@@ -255,9 +262,9 @@ export function GHSyncProvider(props: { children: React.ReactNode }) {
         }
     }, [isReady, setupStatus.hasPAT, checkForChanges]);
 
-    // Poll for changes every minute
+    // Poll for changes based on autoSync interval
     useEffect(() => {
-        if (!isReady) {
+        if (!isReady || !autoSync.enabled) {
             if (pollIntervalRef.current) {
                 clearInterval(pollIntervalRef.current);
                 pollIntervalRef.current = null;
@@ -265,9 +272,10 @@ export function GHSyncProvider(props: { children: React.ReactNode }) {
             return;
         }
 
+        const pollInterval = autoSync.intervalSeconds * 1000;
         pollIntervalRef.current = setInterval(() => {
             checkForChanges();
-        }, POLL_INTERVAL);
+        }, pollInterval);
 
         return () => {
             if (pollIntervalRef.current) {
@@ -275,7 +283,91 @@ export function GHSyncProvider(props: { children: React.ReactNode }) {
                 pollIntervalRef.current = null;
             }
         };
-    }, [isReady, checkForChanges]);
+    }, [isReady, autoSync.enabled, autoSync.intervalSeconds, checkForChanges]);
+
+    // Handle file watching for auto-sync on changes
+    useEffect(() => {
+        // Only watch files if auto-sync on changes is enabled and we're ready
+        if (!isReady || !autoSync.enabled || !autoSync.syncOnChanges) {
+            // Clear any pending debounce
+            if (changeDebounceRef.current) {
+                clearTimeout(changeDebounceRef.current);
+                changeDebounceRef.current = null;
+            }
+            // Stop file watcher if running
+            if (fileWatcherRef.current) {
+                fileWatcherRef.current.stop();
+                fileWatcherRef.current = null;
+            }
+            return;
+        }
+
+        // Set up file watcher using polling (checking git status periodically)
+        // This is simpler than watching all individual files
+        let lastChangeDetected: number | null = null;
+        let watcherActive = true;
+
+        const watchForChanges = async () => {
+            if (!watcherActive) return;
+
+            try {
+                const response = await fetch("/api/git/status");
+                if (response.ok) {
+                    const data = await response.json();
+                    const hasChanges = data.initialized && data.hasUncommittedChanges;
+
+                    if (hasChanges) {
+                        const now = Date.now();
+                        // Only update lastChangeDetected if it's a new change detection
+                        if (lastChangeDetected === null || now - lastChangeDetected > CHANGE_DEBOUNCE_MS) {
+                            lastChangeDetected = now;
+
+                            // Clear any existing debounce timer
+                            if (changeDebounceRef.current) {
+                                clearTimeout(changeDebounceRef.current);
+                            }
+
+                            // Set up debounced sync
+                            changeDebounceRef.current = setTimeout(() => {
+                                if (watcherActive && syncRef.current) {
+                                    syncRef.current();
+                                }
+                            }, CHANGE_DEBOUNCE_MS);
+                        }
+                    }
+                }
+            } catch (_error) {
+                // Silently ignore errors during background watching
+            }
+
+            // Schedule next check
+            if (watcherActive) {
+                setTimeout(watchForChanges, 3000); // Check every 3 seconds
+            }
+        };
+
+        // Start watching
+        watchForChanges();
+
+        // Cleanup function
+        fileWatcherRef.current = {
+            stop: () => {
+                watcherActive = false;
+                if (changeDebounceRef.current) {
+                    clearTimeout(changeDebounceRef.current);
+                    changeDebounceRef.current = null;
+                }
+            },
+        };
+
+        return () => {
+            watcherActive = false;
+            if (changeDebounceRef.current) {
+                clearTimeout(changeDebounceRef.current);
+                changeDebounceRef.current = null;
+            }
+        };
+    }, [isReady, autoSync.enabled, autoSync.syncOnChanges]);
 
     // Re-check ready state when navigating (in case user sets up git)
     useEffect(() => {
@@ -307,6 +399,8 @@ export function GHSyncProvider(props: { children: React.ReactNode }) {
             needsSetup,
             gitAuthMode,
             setGitAuthMode,
+            autoSync,
+            setAutoSyncConfig,
         }}>
             {children}
         </GHSyncContext.Provider>

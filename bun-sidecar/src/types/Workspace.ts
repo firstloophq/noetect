@@ -19,6 +19,13 @@ export const ProjectPreferencesSchema = z.object({
 export const GitAuthModeSchema = z.enum(["pat", "local"]);
 export type GitAuthMode = z.infer<typeof GitAuthModeSchema>;
 
+export const AutoSyncConfigSchema = z.object({
+    enabled: z.boolean().default(true),
+    syncOnChanges: z.boolean().default(true),
+    intervalSeconds: z.number().default(60),
+});
+export type AutoSyncConfig = z.infer<typeof AutoSyncConfigSchema>;
+
 export const WorkspaceStateSchema = z.object({
     tabs: z.array(WorkspaceTabSchema),
     activeTabId: z.string().nullable(),
@@ -28,6 +35,7 @@ export const WorkspaceStateSchema = z.object({
     themeName: z.string().default("Light"),
     projectPreferences: z.record(z.string(), ProjectPreferencesSchema).default({}),
     gitAuthMode: GitAuthModeSchema.default("local"),
+    autoSync: AutoSyncConfigSchema.default({ enabled: true, syncOnChanges: true, intervalSeconds: 60 }),
 });
 
 export type WorkspaceTab = z.infer<typeof WorkspaceTabSchema>;
