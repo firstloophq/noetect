@@ -229,15 +229,18 @@ export const ProseMirrorChatInput = forwardRef<ProseMirrorChatInputHandle, Prose
                     }
                     return false; // Let default handling proceed
                 },
-                // Handle Cmd+Enter (Mac) or Ctrl+Enter (Windows/Linux) to submit
-                // Plain Enter inserts a newline
+                // Handle Enter to submit, Shift+Enter to insert newline
                 handleKeyDown(view, event) {
-                    const isModEnter = event.key === "Enter" && (event.metaKey || event.ctrlKey);
-
-                    if (isModEnter) {
-                        // Don't submit if file picker or skill picker is open
+                    if (event.key === "Enter") {
+                        // Don't handle Enter if file picker or skill picker is open
                         if (filePickerOpenRef.current || skillPickerOpenRef.current) return false;
 
+                        // Shift+Enter inserts a newline (default behavior)
+                        if (event.shiftKey) {
+                            return false; // Let default handler insert newline
+                        }
+
+                        // Plain Enter submits the message
                         event.preventDefault();
                         const content = defaultMarkdownSerializer.serialize(view.state.doc);
                         if (content.trim() && onSubmitRef.current) {
@@ -245,7 +248,7 @@ export const ProseMirrorChatInput = forwardRef<ProseMirrorChatInputHandle, Prose
                         }
                         return true; // Handled
                     }
-                    return false; // Let other handlers process (including Enter for newlines)
+                    return false; // Let other handlers process
                 },
                 dispatchTransaction(transaction) {
                     const newState = view.state.apply(transaction);
