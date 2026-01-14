@@ -37,7 +37,6 @@ interface GHSyncContextValue {
 
 const GHSyncContext = createContext<GHSyncContextValue | null>(null);
 
-const DEFAULT_POLL_INTERVAL = 60 * 1000; // 1 minute
 const CHANGE_DEBOUNCE_MS = 5000; // 5 seconds - batching window for local changes
 
 export function GHSyncProvider(props: { children: React.ReactNode }) {
@@ -337,7 +336,7 @@ export function GHSyncProvider(props: { children: React.ReactNode }) {
                         }
                     }
                 }
-            } catch (error) {
+            } catch (_error) {
                 // Silently ignore errors during background watching
             }
 
