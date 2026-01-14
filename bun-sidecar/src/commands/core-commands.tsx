@@ -7,6 +7,7 @@ import { X } from "lucide-react";
 import { WorkspaceTab } from "@/types/Workspace";
 import { notesAPI } from "@/hooks/useNotesAPI";
 import { todosAPI } from "@/hooks/useTodosAPI";
+import { logsAPI } from "@/hooks/useLogsAPI";
 import { dispatchRefresh } from "@/lib/events";
 import { useCommandDialog } from "@/components/CommandDialogProvider";
 import { useNativeSubmit } from "@/hooks/useNativeKeyboardBridge";
@@ -363,6 +364,26 @@ export function getCoreCommands(context: CoreCommandContext): Command[] {
                 // For now, this command works best when triggered from notes editor
                 // Todo support would need additional context about which todo is selected
                 console.log("Tags command: Not on a supported view (notes editor)");
+            },
+        },
+        {
+            id: "core.logsReveal",
+            name: "Reveal Logs in Finder",
+            description: "Show the log file in Finder",
+            icon: "FileText",
+            callback: async () => {
+                context.closeCommandMenu();
+                await logsAPI.reveal();
+            },
+        },
+        {
+            id: "core.logsReset",
+            name: "Reset Logs",
+            description: "Clear all log entries",
+            icon: "Trash",
+            callback: async () => {
+                context.closeCommandMenu();
+                await logsAPI.reset();
             },
         },
     ];

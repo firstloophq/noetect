@@ -1,7 +1,6 @@
 import winston from 'winston';
 import { join } from 'path';
 import { homedir } from 'os';
-import { getNoetectPath, hasActiveWorkspace } from '@/storage/root-path';
 
 // Define log levels
 const logLevels = {
@@ -12,21 +11,17 @@ const logLevels = {
   debug: 4,
 };
 
-// Get log directory - uses workspace .noetect if available, otherwise app support directory
+// Centralized log directory in app support (shared across all workspaces)
+const LOG_DIR = join(homedir(), 'Library/Application Support/com.firstloop.noetect');
+const LOG_FILE = join(LOG_DIR, 'logs.txt');
+
 function getLogDir(): string {
-  if (hasActiveWorkspace()) {
-    return getNoetectPath();
-  }
-  return join(homedir(), 'Library/Application Support/com.firstloop.noetect');
+  return LOG_DIR;
 }
 
 function getLogFile(): string {
-  return join(getLogDir(), 'logs.txt');
+  return LOG_FILE;
 }
-
-// Initial paths (may be updated after workspace init)
-let LOG_DIR = getLogDir();
-let LOG_FILE = getLogFile();
 
 // Custom format for console output
 const consoleFormat = winston.format.combine(

@@ -17,6 +17,7 @@ import { workspacesRoutes } from "./server-routes/workspaces-routes";
 import { filesystemRoutes } from "./server-routes/filesystem-routes";
 import { uploadsRoutes } from "./server-routes/uploads-routes";
 import { versionRoutes } from "./server-routes/version-routes";
+import { logsRoutes } from "./server-routes/logs-routes";
 
 // Terminal WebSocket data type
 interface TerminalWSData {
@@ -66,6 +67,7 @@ const server = serve<WSData>({
         ...secretsRoutes,
         ...skillsRoutes,
         ...versionRoutes,
+        ...logsRoutes,
         // WebSocket route handler
         "/ws": {
             GET: (req, server) => {
