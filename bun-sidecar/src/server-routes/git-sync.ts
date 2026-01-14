@@ -110,6 +110,7 @@ export const gitInstalledRoute: RouteHandler<GitInstalledResponse> = {
 
             // Use 'which git' to check if git is in PATH (PATH is augmented at module load)
             const whichResult = await $`which git 2>&1`.nothrow();
+            logger.info("which git result", { exitCode: whichResult.exitCode, output: whichResult.text().trim() });
 
             if (whichResult.exitCode !== 0) {
                 logger.info("Git not found in PATH");
