@@ -1,0 +1,28 @@
+name: Build Validation
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  bun-sidecar:
+    name: Bun Sidecar Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: |
+          cd bun-sidecar
+          bun install
+
+      - name: Build (Tailwind + ESLint + TypeScript)
+        run: |
+          cd bun-sidecar
+          bun run build

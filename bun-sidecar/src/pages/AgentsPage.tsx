@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -27,33 +28,46 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { WorkspaceSidebar } from "@/components/WorkspaceSidebar";
 import { useTheme } from "@/hooks/useTheme";
 import { useAgentsAPI } from "@/hooks/useAgentsAPI";
-import type { AgentConfig, McpServerDefinition } from "@/features/agents/index";
+import { useMcpServersAPI } from "@/hooks/useMcpServersAPI";
+import type { AgentConfig } from "@/features/agents/index";
 import { MODEL_DISPLAY_NAMES } from "@/features/agents/index";
-import { Plus, Pencil, Trash2, Copy, Bot } from "lucide-react";
+import type { UserMcpServer } from "@/features/mcp-servers/mcp-server-types";
+import { Plus, Pencil, Trash2, Copy, Bot, Server } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+
+interface CombinedMcpServer extends UserMcpServer {
+    isBuiltIn?: boolean;
+}
 
 type AgentModel = AgentConfig["model"];
 
 function AgentsContent() {
     const { currentTheme } = useTheme();
+    const navigate = useNavigate();
     const api = useAgentsAPI();
+    const mcpServersAPI = useMcpServersAPI();
 
     const [agents, setAgents] = useState<AgentConfig[]>([]);
-    const [mcpRegistry, setMcpRegistry] = useState<McpServerDefinition[]>([]);
+    const [allMcpServers, setAllMcpServers] = useState<CombinedMcpServer[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
-    // Dialog state
+    // Dialog state (for edit and delete only)
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [editingAgent, setEditingAgent] = useState<AgentConfig | null>(null);
     const [deleteConfirmAgent, setDeleteConfirmAgent] = useState<AgentConfig | null>(null);
 
-    // Form state
+    // Form state (for editing)
     const [formName, setFormName] = useState("");
     const [formDescription, setFormDescription] = useState("");
     const [formSystemPrompt, setFormSystemPrompt] = useState("");
     const [formModel, setFormModel] = useState<AgentModel>("claude-sonnet-4-5-20250929");
     const [formMcpServers, setFormMcpServers] = useState<string[]>([]);
 
-    // Load agents and MCP registry on mount
+    // Separate built-in and user-defined servers
+    const builtInServers = allMcpServers.filter((s) => s.isBuiltIn);
+    const userServers = allMcpServers.filter((s) => !s.isBuiltIn);
+
+    // Load agents and MCP servers on mount
     useEffect(() => {
         loadData();
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -62,12 +76,12 @@ function AgentsContent() {
     async function loadData() {
         setIsLoading(true);
         try {
-            const [agentsList, registry] = await Promise.all([
+            const [agentsList, mcpResponse] = await Promise.all([
                 api.listAgents(),
-                api.getMcpRegistry(),
+                mcpServersAPI.getAllServers(),
             ]);
             setAgents(agentsList);
-            setMcpRegistry(registry);
+            setAllMcpServers(mcpResponse.servers);
         } catch (error) {
             console.error("Failed to load agents:", error);
         } finally {
@@ -75,14 +89,8 @@ function AgentsContent() {
         }
     }
 
-    function openCreateDialog() {
-        setEditingAgent(null);
-        setFormName("");
-        setFormDescription("");
-        setFormSystemPrompt("");
-        setFormModel("claude-sonnet-4-5-20250929");
-        setFormMcpServers([]);
-        setIsDialogOpen(true);
+    function openCreatePage() {
+        navigate("/new-agent");
     }
 
     function openEditDialog(agent: AgentConfig) {
@@ -97,26 +105,16 @@ function AgentsContent() {
 
     async function handleSave() {
         try {
-            if (editingAgent) {
-                await api.updateAgent({
-                    agentId: editingAgent.id,
-                    updates: {
-                        name: formName,
-                        description: formDescription || undefined,
-                        systemPrompt: formSystemPrompt,
-                        model: formModel,
-                        mcpServers: formMcpServers,
-                    },
-                });
-            } else {
-                await api.createAgent({
+            await api.updateAgent({
+                agentId: editingAgent!.id,
+                updates: {
                     name: formName,
                     description: formDescription || undefined,
                     systemPrompt: formSystemPrompt,
                     model: formModel,
                     mcpServers: formMcpServers,
-                });
-            }
+                },
+            });
             setIsDialogOpen(false);
             await loadData();
         } catch (error) {
@@ -179,10 +177,16 @@ function AgentsContent() {
                         Configure AI agents with custom system prompts and MCP servers.
                     </p>
                 </div>
-                <Button onClick={openCreateDialog}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    New Agent
-                </Button>
+                <div className="flex items-center gap-2">
+                    <Button variant="outline" onClick={() => navigate("/mcp-servers")}>
+                        <Server className="mr-2 h-4 w-4" />
+                        MCP Servers
+                    </Button>
+                    <Button onClick={openCreatePage}>
+                        <Plus className="mr-2 h-4 w-4" />
+                        New Agent
+                    </Button>
+                </div>
             </div>
 
             <Separator />
@@ -263,7 +267,7 @@ function AgentsContent() {
                                         {agent.mcpServers.length === 0
                                             ? "None"
                                             : agent.mcpServers
-                                                  .map((id) => mcpRegistry.find((s) => s.id === id)?.name || id)
+                                                  .map((id) => allMcpServers.find((s) => s.id === id)?.name || id)
                                                   .join(", ")}
                                     </span>
                                 </div>
@@ -286,11 +290,11 @@ function AgentsContent() {
                 ))}
             </div>
 
-            {/* Create/Edit Dialog */}
+            {/* Edit Dialog */}
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
-                        <DialogTitle>{editingAgent ? "Edit Agent" : "Create New Agent"}</DialogTitle>
+                        <DialogTitle>Edit Agent</DialogTitle>
                         <DialogDescription>
                             Configure the agent's settings, system prompt, and MCP servers.
                         </DialogDescription>
@@ -347,34 +351,76 @@ function AgentsContent() {
                             </p>
                         </div>
 
-                        <div className="space-y-2">
+                        <div className="space-y-4">
                             <Label>MCP Servers</Label>
-                            {mcpRegistry.length === 0 ? (
+                            {allMcpServers.length === 0 ? (
                                 <p className="text-sm" style={{ color: currentTheme.styles.contentSecondary }}>
                                     No MCP servers available.
                                 </p>
                             ) : (
-                                <div className="space-y-2">
-                                    {mcpRegistry.map((server) => (
-                                        <div key={server.id} className="flex items-start space-x-3">
-                                            <Checkbox
-                                                id={`mcp-${server.id}`}
-                                                checked={formMcpServers.includes(server.id)}
-                                                onCheckedChange={() => toggleMcpServer(server.id)}
-                                            />
-                                            <div className="grid gap-1.5 leading-none">
-                                                <label
-                                                    htmlFor={`mcp-${server.id}`}
-                                                    className="text-sm font-medium cursor-pointer"
-                                                >
-                                                    {server.name}
-                                                </label>
-                                                <p className="text-xs" style={{ color: currentTheme.styles.contentSecondary }}>
-                                                    {server.description}
-                                                </p>
+                                <div className="space-y-4">
+                                    {/* User-defined servers */}
+                                    {userServers.length > 0 && (
+                                        <div className="space-y-2">
+                                            <p className="text-xs font-medium" style={{ color: currentTheme.styles.contentSecondary }}>
+                                                User Defined
+                                            </p>
+                                            <div className="space-y-2">
+                                                {userServers.map((server) => (
+                                                    <div key={server.id} className="flex items-start space-x-3">
+                                                        <Checkbox
+                                                            id={`mcp-edit-${server.id}`}
+                                                            checked={formMcpServers.includes(server.id)}
+                                                            onCheckedChange={() => toggleMcpServer(server.id)}
+                                                        />
+                                                        <div className="grid gap-1.5 leading-none">
+                                                            <label
+                                                                htmlFor={`mcp-edit-${server.id}`}
+                                                                className="text-sm font-medium cursor-pointer"
+                                                            >
+                                                                {server.name}
+                                                            </label>
+                                                            <p className="text-xs" style={{ color: currentTheme.styles.contentSecondary }}>
+                                                                {server.description || "No description"}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                ))}
                                             </div>
                                         </div>
-                                    ))}
+                                    )}
+
+                                    {/* Built-in servers */}
+                                    {builtInServers.length > 0 && (
+                                        <div className="space-y-2">
+                                            <p className="text-xs font-medium" style={{ color: currentTheme.styles.contentSecondary }}>
+                                                Built-in
+                                            </p>
+                                            <div className="space-y-2">
+                                                {builtInServers.map((server) => (
+                                                    <div key={server.id} className="flex items-start space-x-3">
+                                                        <Checkbox
+                                                            id={`mcp-edit-${server.id}`}
+                                                            checked={formMcpServers.includes(server.id)}
+                                                            onCheckedChange={() => toggleMcpServer(server.id)}
+                                                        />
+                                                        <div className="grid gap-1.5 leading-none">
+                                                            <label
+                                                                htmlFor={`mcp-edit-${server.id}`}
+                                                                className="text-sm font-medium cursor-pointer flex items-center gap-2"
+                                                            >
+                                                                {server.name}
+                                                                <Badge variant="secondary" className="text-[10px] px-1 py-0">Built-in</Badge>
+                                                            </label>
+                                                            <p className="text-xs" style={{ color: currentTheme.styles.contentSecondary }}>
+                                                                {server.description || "No description"}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>
@@ -385,7 +431,7 @@ function AgentsContent() {
                             Cancel
                         </Button>
                         <Button onClick={handleSave} disabled={!formName.trim()}>
-                            {editingAgent ? "Save Changes" : "Create Agent"}
+                            Save Changes
                         </Button>
                     </DialogFooter>
                 </DialogContent>
