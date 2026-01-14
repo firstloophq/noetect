@@ -1,17 +1,23 @@
 import { z } from "zod";
 
 // Model options available for agent configuration
-export const ModelSchema = z.enum([
-    "claude-sonnet-4-5-20250929",
-    "claude-opus-4-20250514",
-    "claude-3-5-haiku-20241022",
-]);
+// We use z.string() to allow custom model identifiers while providing predefined options
+export const ModelSchema = z.string();
 
 export type AgentModel = z.infer<typeof ModelSchema>;
 
-// Display names for models
-export const MODEL_DISPLAY_NAMES: Record<AgentModel, string> = {
+// Predefined model options for quick selection
+export const PREDEFINED_MODELS = [
+    "claude-sonnet-4-5-20250929",
+    "claude-opus-4-5-20251101",
+    "claude-opus-4-20250514",
+    "claude-3-5-haiku-20241022",
+] as const;
+
+// Display names for predefined models
+export const MODEL_DISPLAY_NAMES: Record<string, string> = {
     "claude-sonnet-4-5-20250929": "Claude Sonnet 4.5",
+    "claude-opus-4-5-20251101": "Claude Opus 4.5",
     "claude-opus-4-20250514": "Claude Opus 4",
     "claude-3-5-haiku-20241022": "Claude Haiku 3.5",
 };
