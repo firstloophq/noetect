@@ -147,7 +147,7 @@ version: 1
         files: {
             "SKILL.md": `---
 name: daily-notes
-description: Manages daily notes with M-D-YYYY format (e.g., 1-1-2026.md). Use when the user asks to view recent notes, create daily notes, read today's notes, summarize the week, or references @notes/ or dates. Can fetch last 7 days of notes.
+description: Manages daily notes with M-D-YYYY format (e.g., 1-1-2026.md). Use when the user asks to view recent notes, create daily notes, read today's notes, summarize the week, or references @notes/ or dates. Can fetch last 7 days of notes. Notes location is configurable in Settings > Storage.
 version: 1
 ---
 
@@ -167,9 +167,23 @@ All daily notes follow this format:
   - December 31, 2025 -> \`12-31-2025.md\`
   - March 5, 2026 -> \`3-5-2026.md\`
 
+## Getting the Notes Directory
+
+The notes location is configurable in Settings > Storage. To get the correct path, query the workspace paths API:
+
+\`\`\`bash
+curl http://localhost:1234/api/workspace/paths
+# Returns: { "success": true, "data": { "notes": "/path/to/notes", ... } }
+\`\`\`
+
+Or use \`jq\` to extract just the notes path:
+\`\`\`bash
+NOTES_DIR=$(curl -s http://localhost:1234/api/workspace/paths | jq -r '.data.notes')
+\`\`\`
+
 ## CLI Usage
 
-The skill provides a shell script. Set the \`NOTES_DIR\` environment variable to the workspace's notes path.
+The skill provides a shell script. Set the \`NOTES_DIR\` environment variable to the workspace's notes path (obtained from the API above).
 
 \`\`\`bash
 NOTES_DIR=/path/to/workspace/notes .claude/skills/daily-notes/daily-note.sh <command> [arguments]

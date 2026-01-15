@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { Result, ErrorCodes } from "../types/Result";
 import { WorkspaceState, WorkspaceStateSchema } from "../types/Workspace";
-import { getNomendexPath } from "../storage/root-path";
+import { getNomendexPath, getRootPath, getNotesPath, getTodosPath, getUploadsPath, getSkillsPath, hasActiveWorkspace } from "../storage/root-path";
 
 const ThemeRequestSchema = z.object({
     themeName: z.string(),
@@ -24,6 +24,7 @@ export const workspaceRoutes = {
                         themeName: "Light",
                         projectPreferences: {},
                         gitAuthMode: "local",
+                        notesLocation: "subfolder",
                     };
                     await Bun.write(`${getNomendexPath()}/workspace.json`, JSON.stringify(defaultWorkspace, null, 2));
 
@@ -135,6 +136,7 @@ export const workspaceRoutes = {
                         themeName: "Light",
                         projectPreferences: {},
                         gitAuthMode: "local",
+                        notesLocation: "subfolder",
                     };
                 }
 
@@ -152,6 +154,44 @@ export const workspaceRoutes = {
                     success: false,
                     code: ErrorCodes.INTERNAL_SERVER_ERROR,
                     message: `Failed to save theme: ${message}`,
+                    error,
+                };
+                return Response.json(response, { status: 500 });
+            }
+        },
+    },
+
+    "/api/workspace/paths": {
+        async GET() {
+            try {
+                if (!hasActiveWorkspace()) {
+                    const response: Result = {
+                        success: false,
+                        code: ErrorCodes.NOT_FOUND,
+                        message: "No active workspace configured",
+                    };
+                    return Response.json(response, { status: 404 });
+                }
+
+                const paths = {
+                    root: getRootPath(),
+                    notes: getNotesPath(),
+                    todos: getTodosPath(),
+                    uploads: getUploadsPath(),
+                    skills: getSkillsPath(),
+                };
+
+                const response: Result<typeof paths> = {
+                    success: true,
+                    data: paths,
+                };
+                return Response.json(response);
+            } catch (error) {
+                const message = error instanceof Error ? error.message : String(error);
+                const response: Result = {
+                    success: false,
+                    code: ErrorCodes.INTERNAL_SERVER_ERROR,
+                    message: `Failed to get workspace paths: ${message}`,
                     error,
                 };
                 return Response.json(response, { status: 500 });

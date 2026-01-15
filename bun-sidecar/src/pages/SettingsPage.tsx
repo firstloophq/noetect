@@ -3,7 +3,7 @@ import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
 import { Separator } from "../components/ui/separator";
-import { WorkspaceProvider } from "@/contexts/WorkspaceContext";
+import { WorkspaceProvider, useWorkspaceContext } from "@/contexts/WorkspaceContext";
 import { KeyboardShortcutsProvider, useKeyboardShortcuts } from "@/contexts/KeyboardShortcutsContext";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { WorkspaceSidebar } from "@/components/WorkspaceSidebar";
@@ -13,8 +13,11 @@ import { triggerNativeUpdate } from "@/hooks/useUpdateNotification";
 import { Badge } from "../components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 
-import { RotateCcw, Eye, EyeOff, Check, X, Key, RefreshCw, Info, Plus, Trash2 } from "lucide-react";
+import { RotateCcw, Eye, EyeOff, Check, X, Key, RefreshCw, Info, Plus, Trash2, FolderOpen } from "lucide-react";
 import { Input } from "../components/ui/input";
+import { RadioGroup, RadioGroupItem } from "../components/ui/radio-group";
+import { Label } from "../components/ui/label";
+import type { NotesLocation } from "@/types/Workspace";
 
 type SecretInfo = {
     key: string;
@@ -26,6 +29,107 @@ type SecretInfo = {
     maskedValue: string;
     isPredefined: boolean;
 };
+
+function StorageSettings() {
+    const { notesLocation, setNotesLocation } = useWorkspaceContext();
+    const { currentTheme } = useTheme();
+    const [pendingChange, setPendingChange] = useState<NotesLocation | null>(null);
+
+    const handleNotesLocationChange = (value: string) => {
+        const newLocation = value as NotesLocation;
+        setPendingChange(newLocation);
+    };
+
+    const applyChange = () => {
+        if (pendingChange) {
+            setNotesLocation(pendingChange);
+            setPendingChange(null);
+            // Reload the page to reinitialize paths
+            window.location.reload();
+        }
+    };
+
+    const cancelChange = () => {
+        setPendingChange(null);
+    };
+
+    const displayValue = pendingChange ?? notesLocation;
+
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                    <FolderOpen className="h-5 w-5" />
+                    Storage Settings
+                </CardTitle>
+                <CardDescription>
+                    Configure where your files are stored in the workspace
+                </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+                <div
+                    className="p-4 rounded-lg border"
+                    style={{
+                        backgroundColor: currentTheme.styles.surfaceSecondary,
+                        borderColor: currentTheme.styles.borderDefault,
+                    }}
+                >
+                    <h4 className="font-medium mb-2" style={{ color: currentTheme.styles.contentPrimary }}>
+                        Notes Location
+                    </h4>
+                    <p className="text-sm mb-4" style={{ color: currentTheme.styles.contentSecondary }}>
+                        Choose where notes are stored in your workspace. Use "Workspace Root" for Obsidian compatibility.
+                    </p>
+
+                    <RadioGroup
+                        value={displayValue}
+                        onValueChange={handleNotesLocationChange}
+                        className="space-y-3"
+                    >
+                        <div className="flex items-start space-x-3">
+                            <RadioGroupItem value="subfolder" id="subfolder" className="mt-1" />
+                            <div className="flex-1">
+                                <Label htmlFor="subfolder" className="font-medium cursor-pointer">
+                                    Notes Subfolder
+                                </Label>
+                                <p className="text-sm" style={{ color: currentTheme.styles.contentTertiary }}>
+                                    Store notes in <code className="px-1 py-0.5 rounded" style={{ backgroundColor: currentTheme.styles.surfaceTertiary }}>/notes</code> folder (default)
+                                </p>
+                            </div>
+                        </div>
+                        <div className="flex items-start space-x-3">
+                            <RadioGroupItem value="root" id="root" className="mt-1" />
+                            <div className="flex-1">
+                                <Label htmlFor="root" className="font-medium cursor-pointer">
+                                    Workspace Root
+                                </Label>
+                                <p className="text-sm" style={{ color: currentTheme.styles.contentTertiary }}>
+                                    Store notes at workspace root (Obsidian-compatible)
+                                </p>
+                            </div>
+                        </div>
+                    </RadioGroup>
+
+                    {pendingChange && (
+                        <div className="mt-4 pt-4 border-t" style={{ borderColor: currentTheme.styles.borderDefault }}>
+                            <p className="text-sm mb-3" style={{ color: currentTheme.styles.contentSecondary }}>
+                                Changing notes location requires a page reload. Your existing notes will not be moved automatically.
+                            </p>
+                            <div className="flex gap-2">
+                                <Button size="sm" onClick={applyChange}>
+                                    Apply & Reload
+                                </Button>
+                                <Button size="sm" variant="ghost" onClick={cancelChange}>
+                                    Cancel
+                                </Button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </CardContent>
+        </Card>
+    );
+}
 
 function SettingsContent() {
     const [editingShortcut, setEditingShortcut] = useState<string | null>(null);
@@ -283,6 +387,7 @@ function SettingsContent() {
                     <TabsTrigger value="keyboard">Keyboard Shortcuts</TabsTrigger>
                     <TabsTrigger value="theme">Theme</TabsTrigger>
                     <TabsTrigger value="secrets">API Keys</TabsTrigger>
+                    <TabsTrigger value="storage">Storage</TabsTrigger>
                     <TabsTrigger value="about">About</TabsTrigger>
                 </TabsList>
 
@@ -934,6 +1039,10 @@ function SettingsContent() {
                             </CardContent>
                         </Card>
                     </div>
+                </TabsContent>
+
+                <TabsContent value="storage">
+                    <StorageSettings />
                 </TabsContent>
 
                 <TabsContent value="about">
