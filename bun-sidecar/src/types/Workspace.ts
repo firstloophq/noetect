@@ -19,6 +19,9 @@ export const ProjectPreferencesSchema = z.object({
 export const GitAuthModeSchema = z.enum(["pat", "local"]);
 export type GitAuthMode = z.infer<typeof GitAuthModeSchema>;
 
+export const NotesLocationSchema = z.enum(["root", "subfolder"]);
+export type NotesLocation = z.infer<typeof NotesLocationSchema>;
+
 export const WorkspaceStateSchema = z.object({
     tabs: z.array(WorkspaceTabSchema),
     activeTabId: z.string().nullable(),
@@ -28,6 +31,7 @@ export const WorkspaceStateSchema = z.object({
     themeName: z.string().default("Light"),
     projectPreferences: z.record(z.string(), ProjectPreferencesSchema).default({}),
     gitAuthMode: GitAuthModeSchema.default("local"),
+    notesLocation: NotesLocationSchema.default("subfolder"),
 });
 
 export type WorkspaceTab = z.infer<typeof WorkspaceTabSchema>;

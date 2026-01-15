@@ -24,6 +24,7 @@ export const workspaceRoutes = {
                         themeName: "Light",
                         projectPreferences: {},
                         gitAuthMode: "local",
+                        notesLocation: "subfolder",
                     };
                     await Bun.write(`${getNomendexPath()}/workspace.json`, JSON.stringify(defaultWorkspace, null, 2));
 
@@ -135,6 +136,7 @@ export const workspaceRoutes = {
                         themeName: "Light",
                         projectPreferences: {},
                         gitAuthMode: "local",
+                        notesLocation: "subfolder",
                     };
                 }
 

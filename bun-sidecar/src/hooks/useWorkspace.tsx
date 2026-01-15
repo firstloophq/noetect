@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { PluginInstance, PluginBase, SerializablePlugin } from "@/types/Plugin";
-import { WorkspaceState, WorkspaceTab, WorkspaceStateSchema, ProjectPreferences, GitAuthMode } from "@/types/Workspace";
+import { WorkspaceState, WorkspaceTab, WorkspaceStateSchema, ProjectPreferences, GitAuthMode, NotesLocation } from "@/types/Workspace";
 import { type RouteParams } from "./useRouting";
 import { emit } from "@/lib/events";
 
@@ -14,6 +14,7 @@ export function useWorkspace(_initialRoute?: RouteParams) {
         themeName: "Light",
         projectPreferences: {},
         gitAuthMode: "local",
+        notesLocation: "subfolder",
     });
     const [loading, setLoading] = useState(true);
     const initialRouteHandledRef = useRef(false);
@@ -438,6 +439,14 @@ export function useWorkspace(_initialRoute?: RouteParams) {
         [updateWorkspace]
     );
 
+    // Notes location
+    const setNotesLocation = useCallback(
+        (location: NotesLocation) => {
+            updateWorkspace((prev) => ({ ...prev, notesLocation: location }));
+        },
+        [updateWorkspace]
+    );
+
     return {
         // State
         workspace,
@@ -481,5 +490,9 @@ export function useWorkspace(_initialRoute?: RouteParams) {
         // Git auth mode
         gitAuthMode: workspace.gitAuthMode,
         setGitAuthMode,
+
+        // Notes location
+        notesLocation: workspace.notesLocation,
+        setNotesLocation,
     };
 }

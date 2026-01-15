@@ -147,7 +147,7 @@ version: 1
         files: {
             "SKILL.md": `---
 name: daily-notes
-description: Manages daily notes with M-D-YYYY format (e.g., 1-1-2026.md). Use when the user asks to view recent notes, create daily notes, read today's notes, summarize the week, or references @notes/ or dates. Can fetch last 7 days of notes.
+description: Manages daily notes with M-D-YYYY format (e.g., 1-1-2026.md). Use when the user asks to view recent notes, create daily notes, read today's notes, summarize the week, or references @notes/ or dates. Can fetch last 7 days of notes. Notes location is configurable in Settings > Storage.
 version: 1
 ---
 
@@ -170,6 +170,10 @@ All daily notes follow this format:
 ## CLI Usage
 
 The skill provides a shell script. Set the \`NOTES_DIR\` environment variable to the workspace's notes path.
+
+**Note**: The notes location is configurable in Settings > Storage. It can be either:
+- \`/path/to/workspace/notes\` (default subfolder mode)
+- \`/path/to/workspace\` (root mode, for Obsidian compatibility)
 
 \`\`\`bash
 NOTES_DIR=/path/to/workspace/notes .claude/skills/daily-notes/daily-note.sh <command> [arguments]

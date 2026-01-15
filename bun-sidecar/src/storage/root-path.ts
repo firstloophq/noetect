@@ -1,5 +1,6 @@
 import { globalConfig } from "./global-config";
 import path from "path";
+import { WorkspaceStateSchema, NotesLocation } from "@/types/Workspace";
 
 interface PathCache {
     rootPath: string;
@@ -14,6 +15,24 @@ interface PathCache {
 let paths: PathCache | null = null;
 
 /**
+ * Read the notes location setting from workspace.json
+ */
+async function getNotesLocationSetting(nomendexPath: string): Promise<NotesLocation> {
+    try {
+        const file = Bun.file(path.join(nomendexPath, "workspace.json"));
+        const exists = await file.exists();
+        if (!exists) {
+            return "subfolder"; // default
+        }
+        const workspaceRaw = await file.json();
+        const workspace = WorkspaceStateSchema.parse(workspaceRaw);
+        return workspace.notesLocation;
+    } catch {
+        return "subfolder"; // default on error
+    }
+}
+
+/**
  * Initialize paths from the active workspace in global config.
  * Must be called before any path getters are used.
  */
@@ -24,11 +43,17 @@ export async function initializePaths(): Promise<void> {
         return;
     }
 
+    const nomendexPath = path.join(workspace.path, ".nomendex");
+    const notesLocation = await getNotesLocationSetting(nomendexPath);
+    const notesPath = notesLocation === "root"
+        ? workspace.path
+        : path.join(workspace.path, "notes");
+
     paths = {
         rootPath: workspace.path,
-        nomendexPath: path.join(workspace.path, ".nomendex"),
+        nomendexPath,
         todosPath: path.join(workspace.path, "todos"),
-        notesPath: path.join(workspace.path, "notes"),
+        notesPath,
         agentsPath: path.join(workspace.path, "agents"),
         skillsPath: path.join(workspace.path, ".claude", "skills"),
         uploadsPath: path.join(workspace.path, "uploads"),
