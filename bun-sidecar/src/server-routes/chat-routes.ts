@@ -40,6 +40,23 @@ async function readImageAsBase64(imageUrl: string): Promise<{ data: string; medi
     }
 }
 
+// Build context information for the agent's system prompt
+function buildAgentContext(workspaceFolder: string): string {
+    const now = new Date();
+    const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const dayOfWeek = dayNames[now.getDay()];
+    const dateStr = now.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+    });
+
+    return `<agent-context>
+Today is ${dayOfWeek}, ${dateStr}.
+You are working in the folder: ${workspaceFolder}
+</agent-context>`;
+}
+
 // Session management types
 type SessionMetadata = {
     id: string;
@@ -430,15 +447,21 @@ export const chatRoutes = {
                     settingSources: ["project"], // Load skills from project .claude/skills/, MCP servers come from mcpServers option
                 };
 
-                // Only add systemPrompt if it's not empty (empty = use SDK default)
+                // Build context-aware system prompt
+                // Always include agent context (date, workspace folder) for all agents
+                const agentContext = buildAgentContext(targetDir);
                 if (agentConfig.systemPrompt) {
-                    sdkOptions.systemPrompt = agentConfig.systemPrompt;
+                    // Custom agent: prepend context to their system prompt
+                    sdkOptions.systemPrompt = `${agentContext}\n\n${agentConfig.systemPrompt}`;
+                } else {
+                    // Default agent: just add context (SDK will use its default prompt)
+                    sdkOptions.systemPrompt = agentContext;
                 }
 
                 console.log("[API] SDK options:", {
                     ...sdkOptions,
                     resume: sessionId || "(new session)",
-                    systemPrompt: sdkOptions.systemPrompt ? "(custom)" : "(default)",
+                    systemPrompt: agentConfig.systemPrompt ? "(custom + context)" : "(context only)",
                     mcpServers: mcpServers,
                     pathToClaudeCodeExecutable: claudeCliPath,
                 });
