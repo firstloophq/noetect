@@ -167,13 +167,23 @@ All daily notes follow this format:
   - December 31, 2025 -> \`12-31-2025.md\`
   - March 5, 2026 -> \`3-5-2026.md\`
 
+## Getting the Notes Directory
+
+The notes location is configurable in Settings > Storage. To get the correct path, query the workspace paths API:
+
+\`\`\`bash
+curl http://localhost:1234/api/workspace/paths
+# Returns: { "success": true, "data": { "notes": "/path/to/notes", ... } }
+\`\`\`
+
+Or use \`jq\` to extract just the notes path:
+\`\`\`bash
+NOTES_DIR=$(curl -s http://localhost:1234/api/workspace/paths | jq -r '.data.notes')
+\`\`\`
+
 ## CLI Usage
 
-The skill provides a shell script. Set the \`NOTES_DIR\` environment variable to the workspace's notes path.
-
-**Note**: The notes location is configurable in Settings > Storage. It can be either:
-- \`/path/to/workspace/notes\` (default subfolder mode)
-- \`/path/to/workspace\` (root mode, for Obsidian compatibility)
+The skill provides a shell script. Set the \`NOTES_DIR\` environment variable to the workspace's notes path (obtained from the API above).
 
 \`\`\`bash
 NOTES_DIR=/path/to/workspace/notes .claude/skills/daily-notes/daily-note.sh <command> [arguments]
